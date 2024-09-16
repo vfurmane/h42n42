@@ -25,6 +25,7 @@
   ocamlformat
   odoc
   (ounit2 :with-test)
-  bisect_ppx)
+  bisect_ppx
+  ocsigenserver)
  (tags
   (topics "school project")))
