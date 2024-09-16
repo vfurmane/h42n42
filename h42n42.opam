@@ -9,6 +9,7 @@ authors: ["Valentin Furmanek"]
 license: "MIT"
 tags: ["topics" "school project"]
 homepage: "https://github.com/vfurmane/h42n42"
+doc: "https://vfurmane.github.io/h42n42"
 bug-reports: "https://github.com/vfurmane/h42n42/issues"
 depends: [
   "ocaml"

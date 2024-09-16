@@ -13,6 +13,8 @@
 
 (license MIT)
 
+(documentation https://vfurmane.github.io/h42n42)
+
 (package
  (name h42n42)
  (synopsis "Simulate the life of a population of creatures threatened by a terrifying virus")
