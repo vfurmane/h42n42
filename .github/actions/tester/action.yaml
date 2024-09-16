@@ -1,0 +1,24 @@
+name: Tester
+
+inputs:
+  ocaml-version:
+    description: The OCaml version to be setup
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Cache the tests coverage
+      id: cache-test
+      uses: actions/cache@v4
+      with:
+        path: _build
+        key: test-${{ runner.os }}-ocaml-v${{ inputs.ocaml-version }}-${{ hashFiles('bin/**/*', 'lib/**/*', 'dune-project', 'dune', '.github/**/*') }}
+        restore-keys: |
+          test-${{ runner.os }}-ocaml-v${{ inputs.ocaml-version }}-
+          test-${{ runner.os }}-
+
+    - if: steps.cache-test.outputs.cache-hit != 'true'
+      name: Run tester
+      shell: sh
+      run: opam exec -- dune runtest --instrument-with bisect_ppx --force

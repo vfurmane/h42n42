@@ -1,0 +1,254 @@
+name: Build, test and deploy
+
+on:
+  - push
+  - pull_request
+
+permissions: read-all
+
+env:
+  BUILD_ARTIFACT_NAME: build
+  BUILD_ARTIFACT_PATH: _build
+  DOC_ARTIFACT_NAME: github-pages
+  DOC_ARTIFACT_PATH: _build/default/_doc/_html
+
+jobs:
+  install:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+        ocaml:
+          - 5.2.0
+          - 4.14.0
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout tree
+        uses: actions/checkout@v4
+
+      - name: Setup OPAM and install packages
+        uses: ./.github/actions/opam-setup-install
+        with:
+          ocaml-version: ${{ matrix.ocaml }}
+
+  build:
+    needs: install
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+        ocaml:
+          - 5.2.0
+          - 4.14.0
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout tree
+        uses: actions/checkout@v4
+
+      - name: Setup OPAM and install packages
+        uses: ./.github/actions/opam-setup-install
+        with:
+          ocaml-version: ${{ matrix.ocaml }}
+
+      - name: Run the builder
+        uses: ./.github/actions/builder
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: "${{ env.BUILD_ARTIFACT_NAME }}-${{ matrix.os }}-ocaml-v${{ matrix.ocaml }}"
+          path: ${{ env.BUILD_ARTIFACT_PATH }}
+
+  test:
+    needs:
+      - build
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+        ocaml:
+          - 5.2.0
+          - 4.14.0
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout tree
+        uses: actions/checkout@v4
+
+      - name: Setup OPAM and install packages
+        uses: ./.github/actions/opam-setup-install
+        with:
+          ocaml-version: ${{ matrix.ocaml }}
+
+      - name: Run the builder
+        uses: ./.github/actions/builder
+
+      - name: Run the tester
+        uses: ./.github/actions/tester
+
+  ocaml-lint-doc:
+    needs: install
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+        ocaml:
+          - 5.2.0
+          - 4.14.0
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout tree
+        uses: actions/checkout@v4
+
+      - name: Setup OPAM and install packages
+        uses: ./.github/actions/opam-setup-install
+        with:
+          ocaml-version: ${{ matrix.ocaml }}
+
+      - name: Lint OCaml documentation
+        uses: ocaml/setup-ocaml/lint-doc@v3
+
+  ocaml-lint-fmt:
+    needs: install
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+        ocaml:
+          - 5.2.0
+          - 4.14.0
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout tree
+        uses: actions/checkout@v4
+
+      - name: Setup OPAM and install packages
+        uses: ./.github/actions/opam-setup-install
+        with:
+          ocaml-version: ${{ matrix.ocaml }}
+
+      - name: Lint OCaml documentation
+        uses: ocaml/setup-ocaml/lint-fmt@v3
+
+  ocaml-lint-opam:
+    needs: install
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+        ocaml:
+          - 5.2.0
+          - 4.14.0
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout tree
+        uses: actions/checkout@v4
+
+      - name: Setup OPAM and install packages
+        uses: ./.github/actions/opam-setup-install
+        with:
+          ocaml-version: ${{ matrix.ocaml }}
+
+      - name: Lint OCaml documentation
+        uses: ocaml/setup-ocaml/lint-opam@v3
+
+  deploy-odoc:
+    if: github.event_name != 'pull_request' && github.ref_name == github.event.repository.default_branch
+
+    environment:
+      name: documentation
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    permissions:
+      actions: read
+      attestations: read
+      checks: read
+      contents: read
+      deployments: read
+      id-token: write
+      issues: read
+      discussions: read
+      packages: read
+      pages: write
+      pull-requests: read
+      repository-projects: read
+      security-events: read
+      statuses: read
+
+    runs-on: ubuntu-latest
+
+    needs:
+      - build
+      - ocaml-lint-doc
+
+    steps:
+      - name: Checkout tree
+        uses: actions/checkout@v4
+
+      - name: Setup OPAM and install packages
+        uses: ./.github/actions/opam-setup-install
+        with:
+          ocaml-version: 5.2.0
+
+      - name: Build documentation
+        run: opam exec -- dune build @doc
+
+      - name: Set-up Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          name: ${{ env.DOC_ARTIFACT_NAME }}
+          path: ${{ env.DOC_ARTIFACT_PATH }}
+
+      - name: Deploy odoc to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          artifact_name: ${{ env.DOC_ARTIFACT_NAME }}
+
+  send-test-coverage:
+    runs-on: ubuntu-latest
+
+    needs:
+      - test
+
+    steps:
+      - name: Checkout tree
+        uses: actions/checkout@v4
+
+      - name: Setup OPAM and install packages
+        uses: ./.github/actions/opam-setup-install
+        with:
+          ocaml-version: 5.2.0
+
+      - name: Run the tester
+        uses: ./.github/actions/tester
+
+      - name: Send the tests coverage to Codecov
+        run: opam exec -- bisect-ppx-report send-to Codecov
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

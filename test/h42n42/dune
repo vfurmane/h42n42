@@ -1,0 +1,5 @@
+(test
+ (name test_h42n42)
+ (libraries ounit2 h42n42)
+ (instrumentation
+  (backend bisect_ppx)))

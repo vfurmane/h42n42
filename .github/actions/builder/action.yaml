@@ -1,0 +1,24 @@
+name: Builder
+
+inputs:
+  ocaml-version:
+    description: The OCaml version to be setup
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Cache the build
+      id: cache-build
+      uses: actions/cache@v4
+      with:
+        path: _build
+        key: build-${{ runner.os }}-ocaml-v${{ inputs.ocaml-version }}-${{ hashFiles('bin/**/*', 'lib/**/*', 'dune-project', 'dune', '.github/**/*') }}
+        restore-keys: |
+          build-${{ runner.os }}-ocaml-v${{ inputs.ocaml-version }}-
+          build-${{ runner.os }}-
+
+    - if: steps.cache-build.outputs.cache-hit != 'true'
+      name: Run builder
+      shell: sh
+      run: opam exec -- dune build
