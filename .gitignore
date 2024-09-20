@@ -31,6 +31,10 @@ setup.log
 # Local OPAM switch
 _opam/
 
+# Ocsigen
+/ocsidb
+/local/
+
 # Editors and IDE
 .idea/
 .vscode/
