@@ -28,6 +28,7 @@
   bisect_ppx
   ocsipersist-sqlite
   eliom
-  ocsigenserver)
+  ocsigenserver
+  ocsigen-ppx-rpc)
  (tags
   (topics "school project")))

@@ -21,6 +21,7 @@ depends: [
   "ocsipersist-sqlite"
   "eliom"
   "ocsigenserver"
+  "ocsigen-ppx-rpc"
 ]
 build: [
   ["dune" "subst"] {dev}
