@@ -17,8 +17,10 @@
 
 (package
  (name h42n42)
- (synopsis "Simulate the life of a population of creatures threatened by a terrifying virus")
- (description "Introduction project to the OCSIGEN Framework, allowing one to create rich web applications written in OCaml. Conceive a simulator where Creature must survive to a deadly virus.")
+ (synopsis
+  "Simulate the life of a population of creatures threatened by a terrifying virus")
+ (description
+  "Introduction project to the OCSIGEN Framework, allowing one to create rich web applications written in OCaml. Conceive a simulator where Creature must survive to a deadly virus.")
  (depends
   ocaml
   dune
