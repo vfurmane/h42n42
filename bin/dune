@@ -1,4 +1,9 @@
 (executable
  (public_name h42n42)
  (name main)
- (libraries h42n42 ocsigenserver ocsigenserver.ext.staticmod))
+ (libraries
+  h42n42
+  ocsigenserver
+  ocsigenserver.ext.staticmod
+  ocsipersist-sqlite
+  eliom.server))

@@ -26,6 +26,8 @@
   odoc
   (ounit2 :with-test)
   bisect_ppx
+  ocsipersist-sqlite
+  eliom
   ocsigenserver)
  (tags
   (topics "school project")))
