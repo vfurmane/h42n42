@@ -27,7 +27,7 @@
   (ounit2 :with-test)
   bisect_ppx
   ocsipersist-sqlite
-  eliom
+  (eliom (< "11.0.0"))
   ocsigenserver
   ocsigen-ppx-rpc)
  (tags
