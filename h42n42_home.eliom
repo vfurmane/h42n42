@@ -5,4 +5,5 @@ let%server service =
 let%client service = ~%service
 
 let%shared page () () =
-  Eliom_content.Html.F.body [H42n42_home_header.c ~cta_service:service ()]
+  Eliom_content.Html.F.body
+    [H42n42_home_header.c ~cta_service:H42n42_simulation.service ()]

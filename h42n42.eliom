@@ -20,3 +20,7 @@ let%client _ = Eliom_client.persist_document_head ()
 let%shared () =
   App.register ~service:H42n42_home.service
     (H42n42_skeleton.c ~title:application_name ~page:H42n42_home.page)
+
+let%shared () =
+  App.register ~service:H42n42_simulation.service
+    (H42n42_skeleton.c ~title:application_name ~page:H42n42_simulation.page)
