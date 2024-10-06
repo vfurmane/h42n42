@@ -66,6 +66,10 @@ ELIOMSTATICDIR        := var/www/${PROJECT_NAME}
 LOCAL_STATIC          := static
 LOCAL_STATIC_CSS      := $(LOCAL_STATIC)/css
 CSS_PREFIX            := $(LOCAL_STATIC_CSS)/${PROJECT_NAME}
+USE_SASS := yes
+LOCAL_CSS := ${CSS_PREFIX}.css
+SASS_SRC := $(addprefix sass/, styles.scss)
+SASSDIR := sass
 ##----------------------------------------------------------------------
 
 
