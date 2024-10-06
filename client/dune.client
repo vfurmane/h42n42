@@ -14,6 +14,10 @@
   (action
     (with-stdout-to %{target}
       (chdir .. (run tools/eliom_ppx_client.exe --as-pp -server-cmo %{cmo:../h42n42_home_header} --impl h42n42_home_header.eliom)))))
+(rule (target h42n42_skeleton.ml) (deps ../h42n42_skeleton.eliom)
+  (action
+    (with-stdout-to %{target}
+      (chdir .. (run tools/eliom_ppx_client.exe --as-pp -server-cmo %{cmo:../h42n42_skeleton} --impl h42n42_skeleton.eliom)))))
 (rule (target hnds_link_button.ml) (deps ../hnds_link_button.eliom)
   (action
     (with-stdout-to %{target}
