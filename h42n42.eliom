@@ -23,4 +23,5 @@ let%shared () =
 
 let%shared () =
   App.register ~service:H42n42_simulation.service
-    (H42n42_skeleton.c ~title:application_name ~page:H42n42_simulation.page)
+    (H42n42_skeleton.c ~title:application_name ~page:H42n42_simulation.page
+       ~effect:H42n42_simulation.effect)

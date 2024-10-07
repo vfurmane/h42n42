@@ -66,3 +66,38 @@ html {
     line-height: 2.25rem;
     text-align: center;
 }
+
+// TAILWIND
+
+:root {
+    --green-100: rgb(220 252 231);
+    --white: rgb(255, 255, 255)
+}
+
+// Layout
+
+.flex {
+    display: flex;
+}
+
+// Flexbox & Grid
+
+.justify-center {
+    justify-content: center;
+}
+
+// Backgrounds
+
+.bg-green-100 {
+    background-color: var(--green-100);
+}
+
+.bg-white {
+    background-color: var(--white);
+}
+
+// Sizing
+
+.w-full {
+    width: 100%;
+}
