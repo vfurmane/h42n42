@@ -2,6 +2,10 @@
   (action
     (with-stdout-to %{target}
       (chdir .. (run tools/eliom_ppx_client.exe --as-pp -server-cmo %{cmo:../Makefile} --impl Makefile.eliom)))))
+(rule (target creet.ml) (deps ../creet.eliom)
+  (action
+    (with-stdout-to %{target}
+      (chdir .. (run tools/eliom_ppx_client.exe --as-pp -server-cmo %{cmo:../creet} --impl creet.eliom)))))
 (rule (target h42n42.ml) (deps ../h42n42.eliom)
   (action
     (with-stdout-to %{target}
@@ -30,3 +34,7 @@
   (action
     (with-stdout-to %{target}
       (chdir .. (run tools/eliom_ppx_client.exe --as-pp -server-cmo %{cmo:../hnds_link_button} --impl hnds_link_button.eliom)))))
+(rule (target simulation_canvas.ml) (deps ../simulation_canvas.eliom)
+  (action
+    (with-stdout-to %{target}
+      (chdir .. (run tools/eliom_ppx_client.exe --as-pp -server-cmo %{cmo:../simulation_canvas} --impl simulation_canvas.eliom)))))
