@@ -11,10 +11,20 @@ module type%client Creet = sig
 end
 
 module%client Creet : Creet = struct
-  type t = {x : float; y : float; radius : float; speed : float}
+  type t =
+    {x : float; y : float; radius : float; speed : float; direction : float}
 
-  let healthy = {x = 0.; y = 0.; radius = 50.; speed = 15.}
-  let move t c = {c with x = c.x +. (c.speed *. t); y = c.y +. (c.speed *. t)}
+  let healthy =
+    {x = 0.; y = 0.; radius = 50.; speed = 15.; direction = 1.7 *. Float.pi}
+
+  let dir_to_coord a =
+    let dx = cos a and dy = 0. -. sin a in
+    dx, dy
+
+  let move t c =
+    let dx, dy = dir_to_coord c.direction in
+    {c with x = c.x +. (dx *. c.speed *. t); y = c.y +. (dy *. c.speed *. t)}
+
   let get_x c = c.x
   let get_y c = c.y
   let get_radius c = c.radius
