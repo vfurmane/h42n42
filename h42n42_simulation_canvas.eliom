@@ -4,6 +4,9 @@ module type%client Creet = sig
   type t
 
   val healthy : t
+
+  (* TODO remove or change, too permissive *)
+  val spawn : float -> float -> float -> float -> t
   val move : float -> t -> t
   val get_x : t -> float
   val get_y : t -> float
@@ -17,13 +20,31 @@ module%client Creet : Creet = struct
   let healthy =
     {x = 0.; y = 0.; radius = 50.; speed = 15.; direction = 1.7 *. Float.pi}
 
+  let spawn x y speed direction = {x; y; radius = 50.; speed; direction}
+
   let dir_to_coord a =
     let dx = cos a and dy = 0. -. sin a in
     dx, dy
 
+  (* TODO canvas width/height *)
   let move t c =
     let dx, dy = dir_to_coord c.direction in
-    {c with x = c.x +. (dx *. c.speed *. t); y = c.y +. (dy *. c.speed *. t)}
+    let new_x = c.x +. (dx *. c.speed *. t)
+    and new_y = c.y +. (dy *. c.speed *. t) in
+    let new_dx =
+      if (new_x -. c.radius <= 0.0 && dx < 0.0)
+         || (new_x +. c.radius >= 900. && dx > 0.0)
+      then 0. -. dx
+      else dx
+    in
+    let new_dy =
+      if (new_y -. c.radius <= 0.0 && dy < 0.0)
+         || (new_y +. c.radius >= 675. && dy > 0.0)
+      then 0. -. dy
+      else dy
+    in
+    let new_d = Float.atan2 (0. -. new_dy) new_dx in
+    {c with x = new_x; y = new_y; direction = new_d}
 
   let get_x c = c.x
   let get_y c = c.y
@@ -115,7 +136,13 @@ let%client init_client () =
   in
   ignore
     (draw_frame
-       {last_frame = {timestamp = 0.; creets = [Creet.healthy]}}
+       { last_frame =
+           { timestamp = 0.
+           ; creets =
+               [ Creet.spawn 0. 0. 400. (1.7 *. Float.pi)
+               ; Creet.spawn 0. 100. 400. (1.94 *. Float.pi)
+               ; Creet.spawn 0. 600. 400. (0.3 *. Float.pi)
+               ; Creet.spawn 496. 578. 400. (0.9 *. Float.pi) ] } }
        (performance_now ()))
 
 let%shared effect () = ignore [%client (init_client () : unit)]
