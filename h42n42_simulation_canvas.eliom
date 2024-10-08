@@ -71,9 +71,10 @@ end
 module%client SimulationCanvas : SimulationCanvas = struct
   open Js_of_ocaml
 
-  type t = {ctx : Dom_html.canvasRenderingContext2D Js.t}
+  type t =
+    {ctx : Dom_html.canvasRenderingContext2D Js.t; ran_state : Random.State.t}
 
-  let of_ctx ctx = {ctx}
+  let of_ctx ctx = {ctx; ran_state = Random.State.make_self_init ()}
   let get_width {ctx} = ctx##.canvas##.width
   let get_height {ctx} = ctx##.canvas##.height
   let get_fwidth {ctx} = float_of_int ctx##.canvas##.width
