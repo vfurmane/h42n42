@@ -71,22 +71,23 @@ end
 module%client SimulationCanvas : SimulationCanvas = struct
   open Js_of_ocaml
 
-  type t = Dom_html.canvasRenderingContext2D Js.t
+  type t = {ctx : Dom_html.canvasRenderingContext2D Js.t}
 
-  let of_ctx ctx = ctx
-  let get_width ctx = ctx##.canvas##.width
-  let get_height ctx = ctx##.canvas##.height
-  let get_fwidth ctx = float_of_int ctx##.canvas##.width
-  let get_fheight ctx = float_of_int ctx##.canvas##.height
-  let get_limits ctx = get_width ctx, get_height ctx
+  let of_ctx ctx = {ctx}
+  let get_width {ctx} = ctx##.canvas##.width
+  let get_height {ctx} = ctx##.canvas##.height
+  let get_fwidth {ctx} = float_of_int ctx##.canvas##.width
+  let get_fheight {ctx} = float_of_int ctx##.canvas##.height
+  let get_limits canvas = get_width canvas, get_height canvas
 
-  let get_flimits ctx =
-    float_of_int (get_width ctx), float_of_int (get_height ctx)
+  let get_flimits canvas =
+    float_of_int (get_width canvas), float_of_int (get_height canvas)
 
-  let clear ctx =
-    ignore ctx ## (clearRect 0. 0. (get_fwidth ctx) (get_fheight ctx))
+  let clear canvas =
+    ignore
+      canvas.ctx ## (clearRect 0. 0. (get_fwidth canvas) (get_fheight canvas))
 
-  let draw_creet ctx creet =
+  let draw_creet {ctx} creet =
     let x = Creet.get_x creet
     and y = Creet.get_y creet
     and r = Creet.get_radius creet in
