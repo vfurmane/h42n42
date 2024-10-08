@@ -14,14 +14,14 @@
   (action
     (with-stdout-to %{target}
       (chdir .. (run tools/eliom_ppx_client.exe --as-pp -server-cmo %{cmo:../h42n42_home_header} --impl h42n42_home_header.eliom)))))
-(rule (target h42n42_simulation_canvas.ml) (deps ../h42n42_simulation_canvas.eliom)
-  (action
-    (with-stdout-to %{target}
-      (chdir .. (run tools/eliom_ppx_client.exe --as-pp -server-cmo %{cmo:../h42n42_simulation_canvas} --impl h42n42_simulation_canvas.eliom)))))
 (rule (target h42n42_simulation.ml) (deps ../h42n42_simulation.eliom)
   (action
     (with-stdout-to %{target}
       (chdir .. (run tools/eliom_ppx_client.exe --as-pp -server-cmo %{cmo:../h42n42_simulation} --impl h42n42_simulation.eliom)))))
+(rule (target h42n42_simulation_canvas.ml) (deps ../h42n42_simulation_canvas.eliom)
+  (action
+    (with-stdout-to %{target}
+      (chdir .. (run tools/eliom_ppx_client.exe --as-pp -server-cmo %{cmo:../h42n42_simulation_canvas} --impl h42n42_simulation_canvas.eliom)))))
 (rule (target h42n42_skeleton.ml) (deps ../h42n42_skeleton.eliom)
   (action
     (with-stdout-to %{target}
