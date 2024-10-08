@@ -3,6 +3,7 @@ module type%client Creet = sig
   (* TODO doc all *)
   type t
 
+  val rotation_prob : float
   val healthy : t
 
   (* TODO remove or change, too permissive *)
@@ -11,11 +12,14 @@ module type%client Creet = sig
   val get_x : t -> float
   val get_y : t -> float
   val get_radius : t -> float
+  val rotate : float -> t -> t
 end
 
 module%client Creet : Creet = struct
   type t =
     {x : float; y : float; radius : float; speed : float; direction : float}
+
+  let rotation_prob = 1. /. 40.
 
   let healthy =
     {x = 0.; y = 0.; radius = 50.; speed = 15.; direction = 1.7 *. Float.pi}
@@ -48,6 +52,8 @@ module%client Creet : Creet = struct
   let get_x c = c.x
   let get_y c = c.y
   let get_radius c = c.radius
+  let rotate a c = {c with direction = c.direction +. a}
+  (* TODO handle > pi || < -pi ---^ *)
 end
 
 module type%client SimulationCanvas = sig
@@ -65,6 +71,7 @@ module type%client SimulationCanvas = sig
   val get_limits : t -> int * int
   val get_flimits : t -> float * float
   val clear : t -> unit
+  val move_creet : float -> float * float -> Creet.t -> t -> Creet.t
   val draw_creet : t -> Creet.t -> unit
 end
 
@@ -87,6 +94,20 @@ module%client SimulationCanvas : SimulationCanvas = struct
   let clear canvas =
     ignore
       canvas.ctx ## (clearRect 0. 0. (get_fwidth canvas) (get_fheight canvas))
+
+  let move_creet t l creet {ran_state} =
+    let rotation_prob = Random.State.float ran_state 1. in
+    let is_rotating = rotation_prob <= Creet.rotation_prob in
+    let new_creet =
+      if is_rotating
+      then
+        let random_direction =
+          Random.State.float ran_state ((2. *. Float.pi) -. Float.pi)
+        in
+        Creet.rotate random_direction creet
+      else creet
+    in
+    Creet.move t l new_creet
 
   let draw_creet {ctx} creet =
     let x = Creet.get_x creet
@@ -136,9 +157,9 @@ let%client init_client () =
       List.map
         (fun creet ->
            let new_creet =
-             Creet.move seconds_passed
+             SimulationCanvas.move_creet seconds_passed
                (SimulationCanvas.get_flimits sim_canvas)
-               creet
+               creet sim_canvas
            in
            SimulationCanvas.draw_creet sim_canvas new_creet;
            new_creet)
@@ -154,10 +175,10 @@ let%client init_client () =
        { last_frame =
            { timestamp = 0.
            ; creets =
-               [ Creet.spawn 0. 0. 400. (1.7 *. Float.pi)
-               ; Creet.spawn 0. 100. 400. (1.94 *. Float.pi)
-               ; Creet.spawn 0. 600. 400. (0.3 *. Float.pi)
-               ; Creet.spawn 496. 578. 400. (0.9 *. Float.pi) ] } }
+               [ Creet.spawn 0. 0. 250. (1.7 *. Float.pi)
+               ; Creet.spawn 0. 100. 250. (1.94 *. Float.pi)
+               ; Creet.spawn 0. 600. 250. (0.3 *. Float.pi)
+               ; Creet.spawn 496. 578. 250. (0.9 *. Float.pi) ] } }
        (performance_now ()))
 
 let%shared effect () = ignore [%client (init_client () : unit)]
