@@ -7,7 +7,7 @@ module type%client Creet = sig
 
   (* TODO remove or change, too permissive *)
   val spawn : float -> float -> float -> float -> t
-  val move : float -> t -> t
+  val move : float -> float * float -> t -> t
   val get_x : t -> float
   val get_y : t -> float
   val get_radius : t -> float
@@ -26,20 +26,19 @@ module%client Creet : Creet = struct
     let dx = cos a and dy = 0. -. sin a in
     dx, dy
 
-  (* TODO canvas width/height *)
-  let move t c =
+  let move t (limit_x, limit_y) c =
     let dx, dy = dir_to_coord c.direction in
     let new_x = c.x +. (dx *. c.speed *. t)
     and new_y = c.y +. (dy *. c.speed *. t) in
     let new_dx =
       if (new_x -. c.radius <= 0.0 && dx < 0.0)
-         || (new_x +. c.radius >= 900. && dx > 0.0)
+         || (new_x +. c.radius >= limit_x && dx > 0.0)
       then 0. -. dx
       else dx
     in
     let new_dy =
       if (new_y -. c.radius <= 0.0 && dy < 0.0)
-         || (new_y +. c.radius >= 675. && dy > 0.0)
+         || (new_y +. c.radius >= limit_y && dy > 0.0)
       then 0. -. dy
       else dy
     in
@@ -63,6 +62,8 @@ module type%client SimulationCanvas = sig
   val get_height : t -> int
   val get_fwidth : t -> float
   val get_fheight : t -> float
+  val get_limits : t -> int * int
+  val get_flimits : t -> float * float
   val clear : t -> unit
   val draw_creet : t -> Creet.t -> unit
 end
@@ -77,6 +78,10 @@ module%client SimulationCanvas : SimulationCanvas = struct
   let get_height ctx = ctx##.canvas##.height
   let get_fwidth ctx = float_of_int ctx##.canvas##.width
   let get_fheight ctx = float_of_int ctx##.canvas##.height
+  let get_limits ctx = get_width ctx, get_height ctx
+
+  let get_flimits ctx =
+    float_of_int (get_width ctx), float_of_int (get_height ctx)
 
   let clear ctx =
     ignore ctx ## (clearRect 0. 0. (get_fwidth ctx) (get_fheight ctx))
@@ -128,7 +133,11 @@ let%client init_client () =
     let new_creets =
       List.map
         (fun creet ->
-           let new_creet = Creet.move seconds_passed creet in
+           let new_creet =
+             Creet.move seconds_passed
+               (SimulationCanvas.get_flimits sim_canvas)
+               creet
+           in
            SimulationCanvas.draw_creet sim_canvas new_creet;
            new_creet)
         options.last_frame.creets
