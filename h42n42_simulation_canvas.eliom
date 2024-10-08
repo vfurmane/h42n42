@@ -59,6 +59,10 @@ module type%client SimulationCanvas = sig
      Js_of_ocaml.Dom_html.canvasRenderingContext2D Js_of_ocaml.Js.t
     -> t
 
+  val get_width : t -> int
+  val get_height : t -> int
+  val get_fwidth : t -> float
+  val get_fheight : t -> float
   val clear : t -> unit
   val draw_creet : t -> Creet.t -> unit
 end
@@ -69,13 +73,13 @@ module%client SimulationCanvas : SimulationCanvas = struct
   type t = Dom_html.canvasRenderingContext2D Js.t
 
   let of_ctx ctx = ctx
+  let get_width ctx = ctx##.canvas##.width
+  let get_height ctx = ctx##.canvas##.height
+  let get_fwidth ctx = float_of_int ctx##.canvas##.width
+  let get_fheight ctx = float_of_int ctx##.canvas##.height
 
   let clear ctx =
-    ignore
-      ctx
-      ## (clearRect 0. 0.
-            (float_of_int ctx##.canvas##.width)
-            (float_of_int ctx##.canvas##.height))
+    ignore ctx ## (clearRect 0. 0. (get_fwidth ctx) (get_fheight ctx))
 
   let draw_creet ctx creet =
     let x = Creet.get_x creet
