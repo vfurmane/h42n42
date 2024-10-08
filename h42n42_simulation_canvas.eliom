@@ -4,6 +4,7 @@ module type%client Creet = sig
   type t
 
   val rotation_prob : float
+  val time_before_rotating : float
   val healthy : t
 
   (* TODO remove or change, too permissive *)
@@ -12,19 +13,32 @@ module type%client Creet = sig
   val get_x : t -> float
   val get_y : t -> float
   val get_radius : t -> float
-  val rotate : float -> t -> t
+  val rotate : timestamp:float -> float -> t -> t
+  val can_rotate : timestamp:float -> t -> bool
 end
 
 module%client Creet : Creet = struct
   type t =
-    {x : float; y : float; radius : float; speed : float; direction : float}
+    { x : float
+    ; y : float
+    ; radius : float
+    ; speed : float
+    ; direction : float
+    ; last_rotation_timestamp : float }
 
   let rotation_prob = 1. /. 40.
+  let time_before_rotating = 1000. *. 2.5
 
   let healthy =
-    {x = 0.; y = 0.; radius = 50.; speed = 15.; direction = 1.7 *. Float.pi}
+    { x = 0.
+    ; y = 0.
+    ; radius = 50.
+    ; speed = 15.
+    ; direction = 1.7 *. Float.pi
+    ; last_rotation_timestamp = 0. }
 
-  let spawn x y speed direction = {x; y; radius = 50.; speed; direction}
+  let spawn x y speed direction =
+    {x; y; radius = 50.; speed; direction; last_rotation_timestamp = 0.}
 
   let dir_to_coord a =
     let dx = cos a and dy = 0. -. sin a in
@@ -52,8 +66,14 @@ module%client Creet : Creet = struct
   let get_x c = c.x
   let get_y c = c.y
   let get_radius c = c.radius
-  let rotate a c = {c with direction = c.direction +. a}
+
+  let rotate ~timestamp a c =
+    {c with direction = c.direction +. a; last_rotation_timestamp = timestamp}
   (* TODO handle > pi || < -pi ---^ *)
+
+  (* TODO perf bottleneck here? *)
+  let can_rotate ~timestamp {last_rotation_timestamp} =
+    last_rotation_timestamp +. time_before_rotating -. timestamp < 0.
 end
 
 module type%client SimulationCanvas = sig
@@ -71,7 +91,16 @@ module type%client SimulationCanvas = sig
   val get_limits : t -> int * int
   val get_flimits : t -> float * float
   val clear : t -> unit
-  val move_creet : float -> float * float -> Creet.t -> t -> Creet.t
+
+  (* TODO named params *)
+  val move_creet :
+     timestamp:float
+    -> float
+    -> float * float
+    -> Creet.t
+    -> t
+    -> Creet.t
+
   val draw_creet : t -> Creet.t -> unit
 end
 
@@ -95,16 +124,21 @@ module%client SimulationCanvas : SimulationCanvas = struct
     ignore
       canvas.ctx ## (clearRect 0. 0. (get_fwidth canvas) (get_fheight canvas))
 
-  let move_creet t l creet {ran_state} =
-    let rotation_prob = Random.State.float ran_state 1. in
-    let is_rotating = rotation_prob <= Creet.rotation_prob in
+  let move_creet ~timestamp t l creet {ran_state} =
+    let is_rotating =
+      if Creet.can_rotate ~timestamp creet
+      then
+        let rotation_prob = Random.State.float ran_state 1. in
+        rotation_prob <= Creet.rotation_prob
+      else false
+    in
     let new_creet =
       if is_rotating
       then
         let random_direction =
           Random.State.float ran_state ((2. *. Float.pi) -. Float.pi)
         in
-        Creet.rotate random_direction creet
+        Creet.rotate ~timestamp random_direction creet
       else creet
     in
     Creet.move t l new_creet
@@ -157,7 +191,7 @@ let%client init_client () =
       List.map
         (fun creet ->
            let new_creet =
-             SimulationCanvas.move_creet seconds_passed
+             SimulationCanvas.move_creet ~timestamp seconds_passed
                (SimulationCanvas.get_flimits sim_canvas)
                creet sim_canvas
            in
