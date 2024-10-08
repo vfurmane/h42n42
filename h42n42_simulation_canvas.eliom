@@ -26,19 +26,19 @@ module%client Creet : Creet = struct
     ; direction : float
     ; last_rotation_timestamp : float }
 
-  let rotation_prob = 1. /. 40.
-  let time_before_rotating = 1000. *. 2.5
+  let rotation_prob = 1. /. 25.
+  let time_before_rotating = 1000. *. 2.
 
   let healthy =
     { x = 0.
     ; y = 0.
-    ; radius = 50.
+    ; radius = 35.
     ; speed = 15.
     ; direction = 1.7 *. Float.pi
     ; last_rotation_timestamp = 0. }
 
   let spawn x y speed direction =
-    {x; y; radius = 50.; speed; direction; last_rotation_timestamp = 0.}
+    {x; y; radius = 35.; speed; direction; last_rotation_timestamp = 0.}
 
   let dir_to_coord a =
     let dx = cos a and dy = 0. -. sin a in
@@ -209,10 +209,10 @@ let%client init_client () =
        { last_frame =
            { timestamp = 0.
            ; creets =
-               [ Creet.spawn 0. 0. 250. (1.7 *. Float.pi)
-               ; Creet.spawn 0. 100. 250. (1.94 *. Float.pi)
-               ; Creet.spawn 0. 600. 250. (0.3 *. Float.pi)
-               ; Creet.spawn 496. 578. 250. (0.9 *. Float.pi) ] } }
+               [ Creet.spawn 0. 0. 115. (1.7 *. Float.pi)
+               ; Creet.spawn 0. 100. 115. (1.94 *. Float.pi)
+               ; Creet.spawn 0. 600. 115. (0.3 *. Float.pi)
+               ; Creet.spawn 496. 578. 115. (0.9 *. Float.pi) ] } }
        (performance_now ()))
 
 let%shared effect () = ignore [%client (init_client () : unit)]
