@@ -7,9 +7,9 @@ module type%shared M = sig
 end
 
 module%shared M = struct
-  type t = {pos : float * float; radius : float}
+  type t = {pos : float * float; radius : float; speed : float}
 
-  let spawn pos = {pos; radius = 24.}
+  let spawn pos = {pos; radius = 24.; speed = 100.}
   let get_pos {pos} = pos
   let get_radius {radius} = radius
 end
