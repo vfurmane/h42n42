@@ -15,7 +15,14 @@ module%shared M = struct
   let get_pos {pos} = pos
   let get_radius {radius} = radius
 
+  let dir_to_coord a =
+    let dx = cos a and dy = 0. -. sin a in
+    dx, dy
+
   let move ~elapsed_time c =
     let x, y = get_pos c in
-    {c with pos = x +. (c.speed *. elapsed_time), y +. (c.speed *. elapsed_time)}
+    let dx, dy = dir_to_coord c.direction in
+    let new_x = x +. (dx *. c.speed *. elapsed_time) in
+    let new_y = y +. (dy *. c.speed *. elapsed_time) in
+    {c with pos = new_x, new_y}
 end
