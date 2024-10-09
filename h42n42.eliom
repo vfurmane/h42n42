@@ -16,6 +16,7 @@ module%shared App = Eliom_registration.App (struct
    update the <head> of the page when changing page. (This also avoids
    blinking when changing page in iOS). *)
 let%client _ = Eliom_client.persist_document_head ()
+let%shared _ = Random.self_init ()
 
 let%shared () =
   App.register ~service:H42n42_home.service
