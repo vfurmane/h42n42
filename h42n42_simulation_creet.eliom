@@ -7,8 +7,10 @@ let%shared c ~creet () =
   Eliom_content.Html.D.(
     div
       ~a:
-        [ a_class ["absolute"; "size-12"; "bg-purple-800"; "rounded-full"]
+        [ a_class ["absolute"; "bg-purple-800"; "rounded-full"]
         ; a_style
-            (Format.sprintf "left: %s; top: %s" (px_of_float x) (px_of_float y))
-        ]
+            (Format.sprintf "left: %s; top: %s; width: %s; height: %s"
+               (px_of_float x) (px_of_float y)
+               (px_of_float (radius *. 2.))
+               (px_of_float (radius *. 2.))) ]
       [])
