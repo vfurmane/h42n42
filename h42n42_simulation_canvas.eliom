@@ -52,7 +52,13 @@ let%client init_client () =
          (Js.wrap_callback (draw_frame {last_frame = {timestamp}})))
   in
   ignore
-    (draw_frame {last_frame = {timestamp = 0.}} (Unsafe_js.performance_now ()))
+    (draw_frame {last_frame = {timestamp = 0.}} (Unsafe_js.performance_now ()));
+  Lwt.async (fun () ->
+    let open Js_of_ocaml_lwt in
+    Lwt_js_events.mousedowns canvas (fun ev _ ->
+      Lwt.return
+        (Firebug.console##log
+           (Format.sprintf "x: %d; y: %d" ev##.clientX ev##.clientY))))
 
 let%shared effect () = ignore [%client (init_client () : unit)]
 let%shared c () = canvas_elt
