@@ -1,13 +1,13 @@
 let%client refresh_rate = 1. /. 60.
 
-let%client effect ~creet:initial_creet ~elt () =
+let%client effect ~creet:initial_creet ~limits ~elt () =
   let open Js_of_ocaml in
   let creet_elt = Eliom_content.Html.To_dom.of_element elt in
   let rec creet_loop ~creet ~last_update_timestamp () =
     let timestamp = (new%js Js.date_now)##getTime in
     let elapsed_time = (timestamp -. last_update_timestamp) /. 1000. in
     let radius = Creet.M.get_radius creet in
-    let new_creet = Creet.M.move ~elapsed_time creet in
+    let new_creet = Creet.M.move ~elapsed_time ~limits creet in
     let x, y = (Creet.M.get_pos new_creet |> Utils.tl_of_center) radius in
     creet_elt##.style##.left := Js.string (Utils.px_of_float x);
     creet_elt##.style##.top := Js.string (Utils.px_of_float y);
@@ -18,7 +18,7 @@ let%client effect ~creet:initial_creet ~elt () =
     (creet_loop ~creet:initial_creet
        ~last_update_timestamp:(new%js Js.date_now)##getTime)
 
-let%shared c ~creet () =
+let%shared c ~creet ~(limits : float * float) () =
   let radius = Creet.M.get_radius creet in
   let x, y = Utils.tl_of_center (Creet.M.get_pos creet) radius in
   let elt =
@@ -33,5 +33,7 @@ let%shared c ~creet () =
                  (Utils.px_of_float (radius *. 2.))) ]
         [])
   in
-  let _ = [%client (effect ~creet:~%creet ~elt:~%elt () : unit)] in
+  let _ =
+    [%client (effect ~creet:~%creet ~limits:~%limits ~elt:~%elt () : unit)]
+  in
   elt

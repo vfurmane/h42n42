@@ -23,5 +23,7 @@ let%shared page () () =
                 ; "mt-20"
                 ; "mx-auto"
                 ; "bg-green-300" ] ]
-          (List.map (fun creet -> H42n42_simulation_creet.c ~creet ()) creets)
-      ])
+          (List.map
+             (fun creet ->
+                H42n42_simulation_creet.c ~creet ~limits:(limit_x, limit_y) ())
+             creets) ])
