@@ -75,6 +75,14 @@ html {
     overflow: hidden;
 }
 
+.absolute {
+    position: absolute;
+}
+
+.relative {
+    position: relative;
+}
+
 // Spacing
 
 .mt-20 {
@@ -96,8 +104,23 @@ html {
     height: 675px;
 }
 
+.size-12 {
+    width: 3rem;
+    height: 3rem;
+}
+
 // Backgrounds
 
 .bg-green-300 {
     background-color: rgb(134 239 172);
+}
+
+.bg-purple-800 {
+    background-color: rgb(107 33 168);
+}
+
+// Borders
+
+.rounded-full {
+    border-radius: 9999px;
 }

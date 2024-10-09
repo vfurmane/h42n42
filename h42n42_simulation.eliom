@@ -14,6 +14,7 @@ let%shared page () () =
           ~a:
             [ a_class
                 [ "overflow-hidden"
+                ; "relative"
                 ; "w-[900px]"
                 ; "h-[675px]"
                 ; "mt-20"
