@@ -5,6 +5,9 @@ let%server service =
 let%client service = ~%service
 
 let%shared page () () =
+  let creets = [Creet.M.spawn (50., 50.)] in
+  (* TODO remove *)
+  ignore creets;
   Eliom_content.Html.F.(
     body
       [ div
