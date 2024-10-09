@@ -51,6 +51,7 @@ let%client init_client () =
       (Dom_html.window##requestAnimationFrame
          (Js.wrap_callback (draw_frame {last_frame = {timestamp}})))
   in
+  (* TODO use request animation and get rid of performance_now *)
   ignore
     (draw_frame {last_frame = {timestamp = 0.}} (Unsafe_js.performance_now ()));
   Lwt.async (fun () ->
@@ -58,7 +59,12 @@ let%client init_client () =
     Lwt_js_events.mousedowns canvas (fun ev _ ->
       Lwt.return
         (Firebug.console##log
-           (Format.sprintf "x: %d; y: %d" ev##.clientX ev##.clientY))))
+           (Format.sprintf "x: %d; y: %d" ev##.clientX ev##.clientY))
+      (* let%lwt () = line ev in
+      Lwt.pick
+        [ Lwt_js_events.mousemoves Dom_html.document (fun x _ -> line x)
+        ; (let%lwt ev = Lwt_js_events.mouseup Dom_html.document in
+           line ev) ] *)))
 
 let%shared effect () = ignore [%client (init_client () : unit)]
 let%shared c () = canvas_elt

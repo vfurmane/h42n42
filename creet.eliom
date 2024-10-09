@@ -15,6 +15,9 @@ module type%client M = sig
   val get_radius : t -> float
   val rotate : timestamp:float -> float -> t -> t
   val can_rotate : timestamp:float -> t -> bool
+  val hold : t -> t
+  val drop : t -> t
+  val is_held : t -> bool
 end
 
 module%client M : M = struct
@@ -24,7 +27,8 @@ module%client M : M = struct
     ; radius : float
     ; speed : float
     ; direction : float
-    ; last_rotation_timestamp : float }
+    ; last_rotation_timestamp : float
+    ; is_held : bool }
 
   let rotation_prob = 1. /. 25.
   let time_before_rotating = 1000. *. 2.
@@ -35,10 +39,17 @@ module%client M : M = struct
     ; radius = 35.
     ; speed = 15.
     ; direction = 1.7 *. Float.pi
-    ; last_rotation_timestamp = 0. }
+    ; last_rotation_timestamp = 0.
+    ; is_held = false }
 
   let spawn x y speed direction =
-    {x; y; radius = 35.; speed; direction; last_rotation_timestamp = 0.}
+    { x
+    ; y
+    ; radius = 35.
+    ; speed
+    ; direction
+    ; last_rotation_timestamp = 0.
+    ; is_held = false }
 
   let dir_to_coord a =
     let dx = cos a and dy = 0. -. sin a in
@@ -74,4 +85,8 @@ module%client M : M = struct
   (* TODO perf bottleneck here? *)
   let can_rotate ~timestamp {last_rotation_timestamp} =
     last_rotation_timestamp +. time_before_rotating -. timestamp < 0.
+
+  let hold c = {c with is_held = true}
+  let drop c = {c with is_held = false}
+  let is_held {is_held} = is_held
 end
