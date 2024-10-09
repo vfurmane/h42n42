@@ -21,11 +21,6 @@ let%shared canvas_elt =
               "The creets are simulated here, unfortunately, your browser does not seem to support HTML5 canvas."
           ] ])
 
-let%client performance_now () : float =
-  let open Js_of_ocaml in
-  let perf = Js.Unsafe.js_expr "performance" in
-  Js.Unsafe.meth_call perf "now" [||]
-
 let%client init_client () =
   let open Js_of_ocaml in
   let canvas = Eliom_content.Html.To_dom.of_canvas ~%canvas_elt in
@@ -60,7 +55,7 @@ let%client init_client () =
                ; Creet.M.spawn 0. 100. 115. (1.94 *. Float.pi)
                ; Creet.M.spawn 0. 600. 115. (0.3 *. Float.pi)
                ; Creet.M.spawn 496. 578. 115. (0.9 *. Float.pi) ] } }
-       (performance_now ()))
+       (Unsafe_js.performance_now ()))
 
 let%shared effect () = ignore [%client (init_client () : unit)]
 let%shared c () = canvas_elt

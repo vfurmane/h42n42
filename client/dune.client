@@ -38,3 +38,7 @@
   (action
     (with-stdout-to %{target}
       (chdir .. (run tools/eliom_ppx_client.exe --as-pp -server-cmo %{cmo:../simulation_canvas} --impl simulation_canvas.eliom)))))
+(rule (target unsafe_js.ml) (deps ../unsafe_js.eliom)
+  (action
+    (with-stdout-to %{target}
+      (chdir .. (run tools/eliom_ppx_client.exe --as-pp -server-cmo %{cmo:../unsafe_js} --impl unsafe_js.eliom)))))
