@@ -3,9 +3,7 @@ let%shared aspect_ratio = 4. /. 3.
 let%shared width = size
 let%shared height = size /. aspect_ratio
 
-type%client draw_options_last_frame =
-  {timestamp : float; creets : Creet.M.t list}
-
+type%client draw_options_last_frame = {timestamp : float}
 type%client draw_options = {last_frame : draw_options_last_frame}
 
 let%shared canvas_elt =
@@ -26,6 +24,13 @@ let%client init_client () =
   let canvas = Eliom_content.Html.To_dom.of_canvas ~%canvas_elt in
   let ctx = canvas##getContext Dom_html._2d_ in
   let sim_canvas = Simulation_canvas.M.of_ctx ctx in
+  let creets =
+    ref
+      [ Creet.M.spawn 0. 0. 115. (1.7 *. Float.pi)
+      ; Creet.M.spawn 0. 100. 115. (1.94 *. Float.pi)
+      ; Creet.M.spawn 0. 600. 115. (0.3 *. Float.pi)
+      ; Creet.M.spawn 496. 578. 115. (0.9 *. Float.pi) ]
+  in
   let rec draw_frame (options : draw_options) (timestamp : float) =
     let seconds_passed = (timestamp -. options.last_frame.timestamp) /. 1000. in
     let _ = Simulation_canvas.M.clear sim_canvas in
@@ -39,23 +44,15 @@ let%client init_client () =
            in
            Simulation_canvas.M.draw_creet sim_canvas new_creet;
            new_creet)
-        options.last_frame.creets
+        !creets
     in
+    creets := new_creets;
     ignore
       (Dom_html.window##requestAnimationFrame
-         (Js.wrap_callback
-            (draw_frame {last_frame = {timestamp; creets = new_creets}})))
+         (Js.wrap_callback (draw_frame {last_frame = {timestamp}})))
   in
   ignore
-    (draw_frame
-       { last_frame =
-           { timestamp = 0.
-           ; creets =
-               [ Creet.M.spawn 0. 0. 115. (1.7 *. Float.pi)
-               ; Creet.M.spawn 0. 100. 115. (1.94 *. Float.pi)
-               ; Creet.M.spawn 0. 600. 115. (0.3 *. Float.pi)
-               ; Creet.M.spawn 496. 578. 115. (0.9 *. Float.pi) ] } }
-       (Unsafe_js.performance_now ()))
+    (draw_frame {last_frame = {timestamp = 0.}} (Unsafe_js.performance_now ()))
 
 let%shared effect () = ignore [%client (init_client () : unit)]
 let%shared c () = canvas_elt
