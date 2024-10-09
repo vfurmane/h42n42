@@ -1,3 +1,6 @@
+let%shared limit_x = 900.
+let%shared limit_y = 675.
+
 let%server service =
   Eliom_service.create ~path:(Eliom_service.Path ["simulation"])
     ~meth:(Eliom_service.Get Eliom_parameter.unit) ()
@@ -15,8 +18,8 @@ let%shared page () () =
             [ a_class
                 [ "overflow-hidden"
                 ; "relative"
-                ; "w-[900px]"
-                ; "h-[675px]"
+                ; Format.sprintf "w-[%s]" (Utils.px_of_float limit_x)
+                ; Format.sprintf "h-[%s]" (Utils.px_of_float limit_y)
                 ; "mt-20"
                 ; "mx-auto"
                 ; "bg-green-300" ] ]
