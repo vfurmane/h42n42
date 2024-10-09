@@ -3,4 +3,17 @@ let%server service =
     ~meth:(Eliom_service.Get Eliom_parameter.unit) ()
 
 let%client service = ~%service
-let%shared page () () = Eliom_content.Html.F.(body [h1 [txt "Hello, World!"]])
+
+let%shared page () () =
+  Eliom_content.Html.F.(
+    body
+      [ div
+          ~a:
+            [ a_class
+                [ "overflow-hidden"
+                ; "w-[900px]"
+                ; "h-[675px]"
+                ; "mt-20"
+                ; "mx-auto"
+                ; "bg-green-300" ] ]
+          [] ])
