@@ -5,5 +5,11 @@ let%server service =
 let%client service = ~%service
 
 let%shared page () () =
-  let elt = Eliom_content.Html.F.(body [H42n42_simulation_frame.c ()]) in
+  let elt =
+    Eliom_content.Html.F.(
+      body
+        [ main
+            ~a:[a_class ["flex"; "justify-center"; "mt-20"; "w-full"]]
+            [H42n42_simulation_frame.c ()] ])
+  in
   elt

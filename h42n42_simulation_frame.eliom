@@ -16,8 +16,6 @@ let%shared c () =
               ; "relative"
               ; Format.sprintf "w-[%s]" (Utils.px_of_float limit_x)
               ; Format.sprintf "h-[%s]" (Utils.px_of_float limit_y)
-              ; "mt-20"
-              ; "mx-auto"
               ; "bg-green-300"
               ; "select-none" ] ]
         (List.map

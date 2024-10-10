@@ -76,6 +76,10 @@ html {
 
 // Layout
 
+.flex {
+    display: flex;
+}
+
 .overflow-hidden {
     overflow: hidden;
 }
@@ -86,6 +90,12 @@ html {
 
 .relative {
     position: relative;
+}
+
+// Flexbox & Grid
+
+.justify-center {
+    justify-content: center;
 }
 
 // Spacing
@@ -100,6 +110,10 @@ html {
 }
 
 // Sizing
+
+.w-full {
+    width: 100%;
+}
 
 .w-\[900px\] {
     width: 900px;
