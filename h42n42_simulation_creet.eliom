@@ -16,7 +16,7 @@ let%client effect ~creet:initial_creet ~limits ~elt () =
       then
         let parent_x, parent_y = !parent_pos in
         let mouse_x, mouse_y = !mouse_pos in
-        Creet.M.set_pos
+        Creet.M.set_pos ~limits
           (float_of_int mouse_x -. parent_x, float_of_int mouse_y -. parent_y)
           creet
       else Creet.M.move ~timestamp ~elapsed_time ~limits creet

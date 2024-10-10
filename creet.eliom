@@ -109,5 +109,19 @@ module%shared M = struct
     let new_direction = Float.atan2 (0. -. new_dy) new_dx in
     {c with pos = new_x, new_y; direction = new_direction}
 
-  let set_pos (x, y) c = {c with pos = x, y}
+  let set_pos ~limits:(limit_x, limit_y) (x, y) c =
+    let r = c.radius in
+    let new_x =
+      let cond1 = x -. r <= 0. in
+      if cond1 || x +. r >= limit_x
+      then if cond1 then r else limit_x -. r
+      else x
+    in
+    let new_y =
+      let cond1 = y -. r <= 0. in
+      if cond1 || y +. r >= limit_y
+      then if cond1 then r else limit_y -. r
+      else y
+    in
+    {c with pos = new_x, new_y}
 end
