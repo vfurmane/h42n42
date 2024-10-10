@@ -2,6 +2,7 @@ module type%shared M = sig
   type t
 
   val spawn : pos:float * float -> t
+  val ran_spawn : limits:float * float -> unit -> t
   val get_pos : t -> float * float
   val get_radius : t -> float
 
@@ -24,6 +25,18 @@ module%shared M = struct
   let healthy_radius = 24.
   let healthy_speed = 100.
   let rotation_prob = 1. /. 40.
+
+  let ran_spawn ~limits:(limit_x, limit_y) () =
+    let radius = healthy_radius in
+    let pos_limit_x = limit_x -. radius and pos_limit_y = limit_y -. radius in
+    let pos =
+      ( Utils.random_float_in_range ~min:radius ~max:pos_limit_x
+      , Utils.random_float_in_range ~min:radius ~max:pos_limit_y )
+    in
+    let speed = healthy_speed in
+    let direction = Random.float (2. *. Float.pi) in
+    let time_before_next_rotation = 0. in
+    {pos; radius; speed; direction; time_before_next_rotation}
 
   let spawn pos =
     { pos
