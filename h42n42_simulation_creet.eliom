@@ -49,8 +49,6 @@ let%client effect ~creet:initial_creet ~limits ~elt () =
             move_creet_to_mouse clientX clientY ();
             is_held := true;
             creet_elt##.classList##add (Js.string held_creet_class_name);
-            Firebug.console##log
-              (Format.sprintf "x: %d; y: %d" ev##.clientX ev##.clientY);
             Lwt.pick
               [ Lwt_js_events.mousemoves Dom_html.document (fun ev _ ->
                   let clientX = ev##.clientX and clientY = ev##.clientY in
