@@ -9,7 +9,7 @@ let%shared page () () =
     Eliom_content.Html.F.(
       body
         [ main
-            ~a:[a_class ["flex"; "justify-center"; "mt-20"; "w-full"]]
-            [H42n42_simulation_frame.c ()] ])
+            ~a:[a_class ["flex"; "gap-16"; "justify-center"; "mt-20"; "w-full"]]
+            [H42n42_simulation_frame.c (); H42n42_simulation_sheet.c ()] ])
   in
   elt
