@@ -2,15 +2,17 @@ let%shared limit_x = 900.
 let%shared limit_y = 675.
 let%shared limits = limit_x, limit_y
 let%shared base_creets_nbr = 5
+let%shared sim_speed_rate = 1. /. 60.
 
 let%client effect ~sim_speed ~creets ~elt () =
   let open Js_of_ocaml in
   let rec sim_loop ~sim ~last_update_timestamp () =
     let timestamp = (new%js Js.date_now)##getTime in
     let elapsed_time = (timestamp -. last_update_timestamp) /. 1000. in
-    (* TODO remove *)
-    ignore elapsed_time;
-    let sim = Simulation.M.random_spawn ~elt ~timestamp ~limits:~%limits sim in
+    let sim =
+      Simulation.M.random_spawn ~elt ~timestamp ~limits:~%limits sim
+      |> Simulation.M.update_speed ~elapsed_time ~speed_rate:sim_speed_rate
+    in
     let%lwt _ = Js_of_ocaml_lwt.Lwt_js.sleep Defaults.refresh_rate in
     sim_loop ~sim ~last_update_timestamp:timestamp ()
   in
