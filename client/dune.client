@@ -26,6 +26,10 @@
   (action
     (with-stdout-to %{target}
       (chdir .. (run tools/eliom_ppx_client.exe --as-pp -server-cmo %{cmo:../h42n42_simulation_creet} --impl h42n42_simulation_creet.eliom)))))
+(rule (target h42n42_simulation_frame.ml) (deps ../h42n42_simulation_frame.eliom)
+  (action
+    (with-stdout-to %{target}
+      (chdir .. (run tools/eliom_ppx_client.exe --as-pp -server-cmo %{cmo:../h42n42_simulation_frame} --impl h42n42_simulation_frame.eliom)))))
 (rule (target h42n42_skeleton.ml) (deps ../h42n42_skeleton.eliom)
   (action
     (with-stdout-to %{target}
