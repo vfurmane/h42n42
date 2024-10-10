@@ -3,7 +3,7 @@ let%shared limit_y = 675.
 let%shared limits = limit_x, limit_y
 let%shared base_creets_nbr = 5
 
-let%client effect ~creets ~elt () =
+let%client effect ~sim_speed ~creets ~elt () =
   let open Js_of_ocaml in
   let rec sim_loop ~sim ~last_update_timestamp () =
     let timestamp = (new%js Js.date_now)##getTime in
@@ -17,13 +17,14 @@ let%client effect ~creets ~elt () =
   ignore
     (Lwt.join
        [ sim_loop
-           ~sim:(Simulation.M.start ~creets ())
+           ~sim:(Simulation.M.start ~creets ~speed:sim_speed ())
            ~last_update_timestamp:(new%js Js.date_now)##getTime
            () ])
 
 let%shared c () =
+  let sim_speed = ref 1. in
   let creets : 'a list =
-    List.init base_creets_nbr (fun _ -> Creet.M.ran_spawn ~limits ())
+    List.init base_creets_nbr (fun _ -> Creet.M.ran_spawn ~sim_speed ~limits ())
   in
   let elt =
     Eliom_content.Html.D.(
@@ -40,5 +41,8 @@ let%shared c () =
            (fun creet -> H42n42_simulation_creet.c ~creet ~limits ())
            creets))
   in
-  let _ = [%client (effect ~creets:~%creets ~elt:~%elt () : unit)] in
+  let _ =
+    [%client
+      (effect ~sim_speed:~%sim_speed ~creets:~%creets ~elt:~%elt () : unit)]
+  in
   elt
