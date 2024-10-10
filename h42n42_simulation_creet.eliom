@@ -31,7 +31,10 @@ let%client effect ~creet:initial_creet ~limits ~elt () =
             is_held := true;
             Firebug.console##log
               (Format.sprintf "x: %d; y: %d" ev##.clientX ev##.clientY);
-            Lwt.return ())) ])
+            Lwt.pick
+              [ (let%lwt _ = Lwt_js_events.mouseup Dom_html.document in
+                 is_held := false;
+                 Lwt.return ()) ])) ])
 
 let%shared c ~creet ~(limits : float * float) () =
   let radius = Creet.M.get_radius creet in
