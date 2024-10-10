@@ -1,8 +1,8 @@
 module type%shared M = sig
   type t
 
-  val spawn : pos:float * float -> t
-  val ran_spawn : limits:float * float -> unit -> t
+  val spawn : sim_speed:float -> pos:float * float -> t
+  val ran_spawn : sim_speed:float -> limits:float * float -> unit -> t
   val get_pos : t -> float * float
   val get_radius : t -> float
 
@@ -18,7 +18,8 @@ end
 
 module%shared M = struct
   type t =
-    { pos : float * float
+    { sim_speed : float ref
+    ; pos : float * float
     ; radius : float
     ; speed : float
     ; direction : float
@@ -28,7 +29,7 @@ module%shared M = struct
   let healthy_speed = 100.
   let rotation_prob = 1. /. 40.
 
-  let ran_spawn ~limits:(limit_x, limit_y) () =
+  let ran_spawn ~sim_speed ~limits:(limit_x, limit_y) () =
     let radius = healthy_radius in
     let pos_limit_x = limit_x -. radius and pos_limit_y = limit_y -. radius in
     let pos =
@@ -38,10 +39,11 @@ module%shared M = struct
     let speed = healthy_speed in
     let direction = Random.float (2. *. Float.pi) in
     let time_before_next_rotation = 0. in
-    {pos; radius; speed; direction; time_before_next_rotation}
+    {sim_speed; pos; radius; speed; direction; time_before_next_rotation}
 
-  let spawn pos =
-    { pos
+  let spawn ~sim_speed pos =
+    { sim_speed
+    ; pos
     ; radius = healthy_radius
     ; speed = healthy_speed
     ; direction = 1.63577 *. Float.pi
@@ -100,8 +102,8 @@ module%shared M = struct
     let c = random_rotation ~timestamp c in
     let x, y = get_pos c in
     let dx, dy = dir_to_coord c.direction in
-    let new_x = x +. (dx *. c.speed *. elapsed_time) in
-    let new_y = y +. (dy *. c.speed *. elapsed_time) in
+    let new_x = x +. (dx *. c.speed *. !(c.sim_speed) *. elapsed_time) in
+    let new_y = y +. (dy *. c.speed *. !(c.sim_speed) *. elapsed_time) in
     let new_x, new_y, new_dx, new_dy =
       bump_on_limits ~limits:(limit_x, limit_y) (new_x, new_y) (dx, dy)
         (get_radius c)
