@@ -26,7 +26,7 @@ let%shared c () =
   in
   let _ = [%client (effect ~creets:~%creets () : unit)] in
   let elt =
-    Eliom_content.Html.F.(
+    Eliom_content.Html.D.(
       div
         ~a:
           [ a_class
