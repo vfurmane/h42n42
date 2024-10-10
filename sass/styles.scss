@@ -69,7 +69,12 @@ html {
 
 .held-creet {
     z-index: 10;
-    box-shadow: 0 0px 6px 4px rgba(0, 0, 0, .25);
+
+    cursor: grabbing !important;
+
+    &>div {
+        box-shadow: 0 0px 6px 4px rgba(0, 0, 0, .25);
+    }
 }
 
 // TAILWIND //
@@ -160,6 +165,11 @@ html {
     height: 1rem;
 }
 
+.size-full {
+    width: 100%;
+    height: 100%;
+}
+
 // Backgrounds
 
 .bg-amber-50 {
@@ -185,6 +195,10 @@ html {
 }
 
 // Interactivity
+
+.cursor-grab {
+    cursor: grab;
+}
 
 .select-none {
     -moz-user-select: -moz-none;

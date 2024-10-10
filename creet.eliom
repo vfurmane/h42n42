@@ -1,6 +1,7 @@
 module type%shared M = sig
   type t
 
+  val grab_offset : float
   val spawn : sim_speed:float -> pos:float * float -> t
   val ran_spawn : sim_speed:float -> limits:float * float -> unit -> t
   val get_pos : t -> float * float
@@ -25,6 +26,7 @@ module%shared M = struct
     ; direction : float
     ; time_before_next_rotation : float }
 
+  let grab_offset = 20.
   let healthy_radius = 24.
   let healthy_speed = 100.
   let rotation_prob = 1. /. 40.

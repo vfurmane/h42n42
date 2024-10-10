@@ -20,7 +20,10 @@ let%client effect ~creet:initial_creet ~limits ~elt () =
           creet
       else Creet.M.move ~timestamp ~elapsed_time ~limits creet
     in
-    let x, y = (Creet.M.get_pos new_creet |> Utils.tl_of_center) radius in
+    let x, y =
+      (Creet.M.get_pos new_creet |> Utils.tl_of_center)
+        (radius +. Creet.M.grab_offset)
+    in
     creet_elt##.style##.left := Js.string (Utils.px_of_float x);
     creet_elt##.style##.top := Js.string (Utils.px_of_float y);
     let%lwt _ = Js_of_ocaml_lwt.Lwt_js.sleep Defaults.refresh_rate in
@@ -65,13 +68,15 @@ let%shared c ~creet ~(limits : float * float) () =
     Eliom_content.Html.D.(
       div
         ~a:
-          [ a_class ["absolute"; "bg-purple-800"; "rounded-full"]
+          [ a_class ["absolute"; "rounded-full"; "cursor-grab"]
           ; a_style
-              (Format.sprintf "left: %s; top: %s; width: %s; height: %s"
+              (Format.sprintf
+                 "left: %s; top: %s; width: %s; height: %s; padding: %s"
                  (Utils.px_of_float x) (Utils.px_of_float y)
                  (Utils.px_of_float (radius *. 2.))
-                 (Utils.px_of_float (radius *. 2.))) ]
-        [])
+                 (Utils.px_of_float (radius *. 2.))
+                 (Utils.px_of_float Creet.M.grab_offset)) ]
+        [div ~a:[a_class ["size-full"; "bg-purple-800"; "rounded-full"]] []])
   in
   let _ =
     [%client (effect ~creet:~%creet ~limits:~%limits ~elt:~%elt () : unit)]
