@@ -9,6 +9,8 @@ module type%client M = sig
     -> limits:float * float
     -> t
     -> t
+
+  val update_speed : elapsed_time:float -> speed_rate:float -> t -> t
 end
 
 module%client M : M = struct
@@ -34,4 +36,8 @@ module%client M : M = struct
       ; time_before_next_spawn =
           timestamp +. (seconds_before_new_spawn /. !(sim.speed) *. 1000.) })
     else sim
+
+  let update_speed ~elapsed_time ~speed_rate sim =
+    sim.speed := !(sim.speed) +. (elapsed_time *. speed_rate);
+    sim
 end
