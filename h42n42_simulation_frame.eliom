@@ -5,17 +5,19 @@ let%shared base_creets_nbr = 5
 
 let%client effect () =
   let open Js_of_ocaml in
-  let rec sim_loop ~last_update_timestamp () =
+  let rec sim_loop ~sim ~last_update_timestamp () =
     let timestamp = (new%js Js.date_now)##getTime in
     let elapsed_time = (timestamp -. last_update_timestamp) /. 1000. in
     (* TODO remove *)
     ignore elapsed_time;
     let%lwt _ = Js_of_ocaml_lwt.Lwt_js.sleep Defaults.refresh_rate in
-    sim_loop ~last_update_timestamp:timestamp ()
+    sim_loop ~sim ~last_update_timestamp:timestamp ()
   in
   ignore
     (Lwt.join
-       [sim_loop ~last_update_timestamp:(new%js Js.date_now)##getTime ()])
+       [ sim_loop ~sim:(Simulation.M.start ())
+           ~last_update_timestamp:(new%js Js.date_now)##getTime
+           () ])
 
 let%shared c () =
   let creets : 'a list =
