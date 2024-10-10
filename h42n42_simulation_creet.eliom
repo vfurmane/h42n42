@@ -5,13 +5,20 @@ let%client effect ~creet:initial_creet ~limits ~elt () =
   let open Js_of_ocaml in
   let creet_elt = Eliom_content.Html.To_dom.of_element elt in
   let is_held = ref false in
+  let parent_pos = ref (0., 0.) in
+  let mouse_pos = ref (0, 0) in
   let rec creet_loop ~creet ~last_update_timestamp () =
     let timestamp = (new%js Js.date_now)##getTime in
     let elapsed_time = (timestamp -. last_update_timestamp) /. 1000. in
     let radius = Creet.M.get_radius creet in
     let new_creet =
       if !is_held = true
-      then creet
+      then
+        let parent_x, parent_y = !parent_pos in
+        let mouse_x, mouse_y = !mouse_pos in
+        Creet.M.set_pos
+          (float_of_int mouse_x -. parent_x, float_of_int mouse_y -. parent_y)
+          creet
       else Creet.M.move ~timestamp ~elapsed_time ~limits creet
     in
     let x, y = (Creet.M.get_pos new_creet |> Utils.tl_of_center) radius in
@@ -27,12 +34,29 @@ let%client effect ~creet:initial_creet ~limits ~elt () =
            ()
        ; (let open Js_of_ocaml_lwt in
           Lwt_js_events.mousedowns creet_elt (fun ev _ ->
+            let move_creet_to_mouse x y () =
+              mouse_pos := x, y;
+              ()
+            in
+            (parent_pos :=
+               let parent_elt = creet_elt##.offsetParent in
+               match Js.Opt.to_option parent_elt with
+               | None -> 0., 0.
+               | Some parent_elt ->
+                   let bounding_rect = parent_elt##getBoundingClientRect in
+                   bounding_rect##.left, bounding_rect##.top);
+            let clientX = ev##.clientX and clientY = ev##.clientY in
+            move_creet_to_mouse clientX clientY ();
             is_held := true;
             creet_elt##.classList##add (Js.string held_creet_class_name);
             Firebug.console##log
               (Format.sprintf "x: %d; y: %d" ev##.clientX ev##.clientY);
             Lwt.pick
-              [ (let%lwt _ = Lwt_js_events.mouseup Dom_html.document in
+              [ Lwt_js_events.mousemoves Dom_html.document (fun ev _ ->
+                  let clientX = ev##.clientX and clientY = ev##.clientY in
+                  move_creet_to_mouse clientX clientY ();
+                  Lwt.return ())
+              ; (let%lwt _ = Lwt_js_events.mouseup Dom_html.document in
                  is_held := false;
                  creet_elt##.classList##remove (Js.string held_creet_class_name);
                  Lwt.return ()) ])) ])

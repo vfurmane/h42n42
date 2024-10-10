@@ -12,6 +12,8 @@ module type%shared M = sig
     -> limits:float * float
     -> t
     -> t
+
+  val set_pos : float * float -> t -> t
 end
 
 module%shared M = struct
@@ -106,4 +108,6 @@ module%shared M = struct
     in
     let new_direction = Float.atan2 (0. -. new_dy) new_dx in
     {c with pos = new_x, new_y; direction = new_direction}
+
+  let set_pos (x, y) c = {c with pos = x, y}
 end
