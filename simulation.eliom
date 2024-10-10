@@ -31,7 +31,7 @@ module%client M : M = struct
            (H42n42_simulation_creet.c ~creet:new_creet ~limits ()));
       { sim with
         creets = new_creet :: sim.creets
-      ; time_before_next_spawn = timestamp +. (seconds_before_new_spawn *. 1000.)
-      })
+      ; time_before_next_spawn =
+          timestamp +. (seconds_before_new_spawn /. !(sim.speed) *. 1000.) })
     else sim
 end
