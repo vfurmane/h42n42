@@ -18,7 +18,12 @@ let%client effect ~creet:initial_creet ~limits ~elt () =
     (Lwt.join
        [ creet_loop ~creet:initial_creet
            ~last_update_timestamp:(new%js Js.date_now)##getTime
-           () ])
+           ()
+       ; (let open Js_of_ocaml_lwt in
+          Lwt_js_events.mousedowns creet_elt (fun ev _ ->
+            Firebug.console##log
+              (Format.sprintf "x: %d; y: %d" ev##.clientX ev##.clientY);
+            Lwt.return ())) ])
 
 let%shared c ~creet ~(limits : float * float) () =
   let radius = Creet.M.get_radius creet in
