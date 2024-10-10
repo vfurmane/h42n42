@@ -10,7 +10,7 @@ let%client effect ~creets ~elt () =
     let elapsed_time = (timestamp -. last_update_timestamp) /. 1000. in
     (* TODO remove *)
     ignore elapsed_time;
-    let sim = Simulation.M.random_spawn ~elt ~limits:~%limits sim in
+    let sim = Simulation.M.random_spawn ~elt ~timestamp ~limits:~%limits sim in
     let%lwt _ = Js_of_ocaml_lwt.Lwt_js.sleep Defaults.refresh_rate in
     sim_loop ~sim ~last_update_timestamp:timestamp ()
   in
