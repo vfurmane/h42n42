@@ -1,4 +1,5 @@
 let%client refresh_rate = 1. /. 60.
+let%client held_creet_class_name = "held-creet"
 
 let%client effect ~creet:initial_creet ~limits ~elt () =
   let open Js_of_ocaml in
@@ -29,11 +30,13 @@ let%client effect ~creet:initial_creet ~limits ~elt () =
        ; (let open Js_of_ocaml_lwt in
           Lwt_js_events.mousedowns creet_elt (fun ev _ ->
             is_held := true;
+            creet_elt##.classList##add (Js.string held_creet_class_name);
             Firebug.console##log
               (Format.sprintf "x: %d; y: %d" ev##.clientX ev##.clientY);
             Lwt.pick
               [ (let%lwt _ = Lwt_js_events.mouseup Dom_html.document in
                  is_held := false;
+                 creet_elt##.classList##remove (Js.string held_creet_class_name);
                  Lwt.return ()) ])) ])
 
 let%shared c ~creet ~(limits : float * float) () =
