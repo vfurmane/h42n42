@@ -12,13 +12,11 @@ let%client effect ~creet:initial_creet ~limits ~elt () =
     let new_creet =
       if !is_held = true
       then creet
-      else
-        let new_creet = Creet.M.move ~timestamp ~elapsed_time ~limits creet in
-        let x, y = (Creet.M.get_pos new_creet |> Utils.tl_of_center) radius in
-        creet_elt##.style##.left := Js.string (Utils.px_of_float x);
-        creet_elt##.style##.top := Js.string (Utils.px_of_float y);
-        new_creet
+      else Creet.M.move ~timestamp ~elapsed_time ~limits creet
     in
+    let x, y = (Creet.M.get_pos new_creet |> Utils.tl_of_center) radius in
+    creet_elt##.style##.left := Js.string (Utils.px_of_float x);
+    creet_elt##.style##.top := Js.string (Utils.px_of_float y);
     let%lwt _ = Js_of_ocaml_lwt.Lwt_js.sleep refresh_rate in
     creet_loop ~creet:new_creet ~last_update_timestamp:timestamp ()
   in
