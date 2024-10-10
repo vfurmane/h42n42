@@ -24,7 +24,8 @@ let%shared page () () =
                 ; Format.sprintf "h-[%s]" (Utils.px_of_float limit_y)
                 ; "mt-20"
                 ; "mx-auto"
-                ; "bg-green-300" ] ]
+                ; "bg-green-300"
+                ; "select-none" ] ]
           (List.map
              (fun creet -> H42n42_simulation_creet.c ~creet ~limits ())
              creets) ])
