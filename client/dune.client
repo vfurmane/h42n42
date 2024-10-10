@@ -46,6 +46,10 @@
   (action
     (with-stdout-to %{target}
       (chdir .. (run tools/eliom_ppx_client.exe --as-pp -server-cmo %{cmo:../hnds_link_button} --impl hnds_link_button.eliom)))))
+(rule (target simulation.ml) (deps ../simulation.eliom)
+  (action
+    (with-stdout-to %{target}
+      (chdir .. (run tools/eliom_ppx_client.exe --as-pp -server-cmo %{cmo:../simulation} --impl simulation.eliom)))))
 (rule (target utils.ml) (deps ../utils.eliom)
   (action
     (with-stdout-to %{target}
