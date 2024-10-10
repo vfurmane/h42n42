@@ -1,6 +1,7 @@
 let%shared limit_x = 900.
 let%shared limit_y = 675.
 let%shared limits = limit_x, limit_y
+let%shared base_creets_nbr = 5
 
 let%server service =
   Eliom_service.create ~path:(Eliom_service.Path ["simulation"])
@@ -9,7 +10,9 @@ let%server service =
 let%client service = ~%service
 
 let%shared page () () =
-  let creets = [Creet.M.spawn (50., 50.)] in
+  let creets : 'a list =
+    List.init base_creets_nbr (fun _ -> Creet.M.ran_spawn ~limits ())
+  in
   Eliom_content.Html.F.(
     body
       [ div
