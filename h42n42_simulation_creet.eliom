@@ -14,9 +14,11 @@ let%client effect ~creet:initial_creet ~limits ~elt () =
     let%lwt _ = Js_of_ocaml_lwt.Lwt_js.sleep refresh_rate in
     creet_loop ~creet:new_creet ~last_update_timestamp:timestamp ()
   in
-  Lwt.async
-    (creet_loop ~creet:initial_creet
-       ~last_update_timestamp:(new%js Js.date_now)##getTime)
+  ignore
+    (Lwt.join
+       [ creet_loop ~creet:initial_creet
+           ~last_update_timestamp:(new%js Js.date_now)##getTime
+           () ])
 
 let%shared c ~creet ~(limits : float * float) () =
   let radius = Creet.M.get_radius creet in
