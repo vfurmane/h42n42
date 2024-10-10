@@ -1,4 +1,3 @@
-let%client refresh_rate = 1. /. 60.
 let%client held_creet_class_name = "held-creet"
 
 let%client effect ~creet:initial_creet ~limits ~elt () =
@@ -24,7 +23,7 @@ let%client effect ~creet:initial_creet ~limits ~elt () =
     let x, y = (Creet.M.get_pos new_creet |> Utils.tl_of_center) radius in
     creet_elt##.style##.left := Js.string (Utils.px_of_float x);
     creet_elt##.style##.top := Js.string (Utils.px_of_float y);
-    let%lwt _ = Js_of_ocaml_lwt.Lwt_js.sleep refresh_rate in
+    let%lwt _ = Js_of_ocaml_lwt.Lwt_js.sleep Defaults.refresh_rate in
     creet_loop ~creet:new_creet ~last_update_timestamp:timestamp ()
   in
   ignore

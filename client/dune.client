@@ -6,6 +6,10 @@
   (action
     (with-stdout-to %{target}
       (chdir .. (run tools/eliom_ppx_client.exe --as-pp -server-cmo %{cmo:../creet} --impl creet.eliom)))))
+(rule (target defaults.ml) (deps ../defaults.eliom)
+  (action
+    (with-stdout-to %{target}
+      (chdir .. (run tools/eliom_ppx_client.exe --as-pp -server-cmo %{cmo:../defaults} --impl defaults.eliom)))))
 (rule (target h42n42.ml) (deps ../h42n42.eliom)
   (action
     (with-stdout-to %{target}
