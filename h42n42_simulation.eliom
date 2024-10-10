@@ -1,5 +1,6 @@
 let%shared limit_x = 900.
 let%shared limit_y = 675.
+let%shared limits = limit_x, limit_y
 
 let%server service =
   Eliom_service.create ~path:(Eliom_service.Path ["simulation"])
@@ -22,6 +23,5 @@ let%shared page () () =
                 ; "mx-auto"
                 ; "bg-green-300" ] ]
           (List.map
-             (fun creet ->
-                H42n42_simulation_creet.c ~creet ~limits:(limit_x, limit_y) ())
+             (fun creet -> H42n42_simulation_creet.c ~creet ~limits ())
              creets) ])
