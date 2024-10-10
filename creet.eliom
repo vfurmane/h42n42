@@ -21,12 +21,14 @@ module%shared M = struct
     ; direction : float
     ; time_before_next_rotation : float }
 
+  let healthy_radius = 24.
+  let healthy_speed = 100.
   let rotation_prob = 1. /. 40.
 
   let spawn pos =
     { pos
-    ; radius = 24.
-    ; speed = 100.
+    ; radius = healthy_radius
+    ; speed = healthy_speed
     ; direction = 1.63577 *. Float.pi
     ; time_before_next_rotation = 0. }
 
