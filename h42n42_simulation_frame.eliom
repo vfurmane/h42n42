@@ -24,7 +24,6 @@ let%shared c () =
   let creets : 'a list =
     List.init base_creets_nbr (fun _ -> Creet.M.ran_spawn ~limits ())
   in
-  let _ = [%client (effect ~creets:~%creets () : unit)] in
   let elt =
     Eliom_content.Html.D.(
       div
@@ -40,4 +39,5 @@ let%shared c () =
            (fun creet -> H42n42_simulation_creet.c ~creet ~limits ())
            creets))
   in
+  let _ = [%client (effect ~creets:~%creets () : unit)] in
   elt
