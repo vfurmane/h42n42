@@ -17,4 +17,17 @@ let%shared c () =
                             ; "bg-purple-800"
                             ; "rounded" ] ]
                       []
-                  ; txt "– Healthy creet" ] ] ] ])
+                  ; txt "– Healthy creet" ]
+              ; li
+                  ~a:[a_class ["flex"; "items-center"]]
+                  [ div
+                      ~a:
+                        [ a_title "Rose color"
+                        ; a_class
+                            [ "inline-block"
+                            ; "mr-1.5"
+                            ; "size-4"
+                            ; "bg-rose-400"
+                            ; "rounded" ] ]
+                      []
+                  ; txt "– Sick creet" ] ] ] ])
