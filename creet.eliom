@@ -96,7 +96,9 @@ module%shared M = struct
       rotate ~timestamp random_direction c
     else c
 
-  let bump_on_limits ~limits:(limit_x, limit_y) (x, y) (dx, dy) r =
+  let bump_on_limits ~limits:(limit_x, limit_y) ~hospital_limit_y (x, y)
+      (dx, dy) r
+    =
     let new_x, new_dx =
       let cond1 = x -. r <= 0. && dx < 0. in
       if cond1 || (x +. r >= limit_x && dx > 0.)
@@ -107,23 +109,27 @@ module%shared M = struct
     in
     let new_y, new_dy =
       let cond1 = y -. r <= 0. && dy < 0. in
-      if cond1 || (y +. r >= limit_y && dy > 0.)
+      if cond1 || (y +. r >= limit_y -. hospital_limit_y && dy > 0.)
       then
-        let new_y = if cond1 then r else limit_y -. r in
+        let new_y =
+          if cond1 then r else if y +. r < limit_y then y else limit_y -. r
+        in
         new_y, 0. -. dy
       else y, dy
     in
     new_x, new_y, new_dx, new_dy
 
-  let move ~timestamp ~elapsed_time ~limits:(limit_x, limit_y) c =
+  let move ~timestamp ~elapsed_time ~limits:(limit_x, limit_y) ~hospital_limit_y
+      c
+    =
     let c = random_rotation ~timestamp c in
     let x, y = get_pos c in
     let dx, dy = dir_to_coord c.direction in
     let new_x = x +. (dx *. c.speed *. !(c.sim_speed) *. elapsed_time) in
     let new_y = y +. (dy *. c.speed *. !(c.sim_speed) *. elapsed_time) in
     let new_x, new_y, new_dx, new_dy =
-      bump_on_limits ~limits:(limit_x, limit_y) (new_x, new_y) (dx, dy)
-        (get_radius c)
+      bump_on_limits ~limits:(limit_x, limit_y) ~hospital_limit_y (new_x, new_y)
+        (dx, dy) (get_radius c)
     in
     let new_direction = Float.atan2 (0. -. new_dy) new_dx in
     {c with pos = new_x, new_y; direction = new_direction}

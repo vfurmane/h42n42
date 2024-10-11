@@ -6,6 +6,7 @@ module type%client M = sig
     -> speed:float ref
     -> limits:float * float
     -> river_limit_y:float
+    -> hospital_limit_y:float
     -> creets:Creet.M.t list
     -> unit
     -> t
@@ -14,6 +15,7 @@ module type%client M = sig
      elt:Html_types.div Eliom_content.Html.F.elt
     -> timestamp:float
     -> limits:float * float
+    -> hospital_limit_y:float
     -> t
     -> t
 
@@ -29,14 +31,15 @@ module%client M : M = struct
         (Js_of_ocaml.Dom_html.element Js_of_ocaml.Js.t * Creet.M.t ref) list
     ; time_before_next_spawn : float }
 
-  let start ~elt ~speed ~limits ~river_limit_y ~creets () =
+  let start ~elt ~speed ~limits ~river_limit_y ~hospital_limit_y ~creets () =
     let creets =
       List.map
         (fun creet ->
            let new_creet_ref = ref creet in
            let new_creet_elt =
              Eliom_content.Html.To_dom.of_element
-               (H42n42_simulation_creet.c ~creet:new_creet_ref ~limits ())
+               (H42n42_simulation_creet.c ~creet:new_creet_ref ~limits
+                  ~hospital_limit_y ())
            in
            Js_of_ocaml.Dom.appendChild
              (Eliom_content.Html.To_dom.of_element elt)
@@ -46,7 +49,7 @@ module%client M : M = struct
     in
     {speed; river_limit_y; creets; time_before_next_spawn = 0.}
 
-  let random_spawn ~elt ~timestamp ~limits sim =
+  let random_spawn ~elt ~timestamp ~limits ~hospital_limit_y sim =
     let is_spawning = timestamp > sim.time_before_next_spawn in
     if is_spawning
     then (
@@ -57,7 +60,8 @@ module%client M : M = struct
       in
       let new_creet_elt =
         Eliom_content.Html.To_dom.of_element
-          (H42n42_simulation_creet.c ~creet:new_creet_ref ~limits ())
+          (H42n42_simulation_creet.c ~creet:new_creet_ref ~limits
+             ~hospital_limit_y ())
       in
       Js_of_ocaml.Dom.appendChild
         (Eliom_content.Html.To_dom.of_element elt)

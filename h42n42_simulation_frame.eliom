@@ -12,7 +12,8 @@ let%client effect ~sim_speed ~(creets : Creet.M.t list) ~elt () =
     let timestamp = (new%js Js.date_now)##getTime in
     let elapsed_time = (timestamp -. last_update_timestamp) /. 1000. in
     let sim =
-      Simulation.M.random_spawn ~elt ~timestamp ~limits:~%limits sim
+      Simulation.M.random_spawn ~elt ~timestamp ~limits:~%limits
+        ~hospital_limit_y:~%hospital_limit_y sim
       |> Simulation.M.update_speed ~elapsed_time ~speed_rate:sim_speed_rate
       |> Simulation.M.contaminate_creets
     in
@@ -24,7 +25,8 @@ let%client effect ~sim_speed ~(creets : Creet.M.t list) ~elt () =
        [ sim_loop
            ~sim:
              (Simulation.M.start ~elt ~creets ~limits
-                ~river_limit_y:~%river_limit_y ~speed:sim_speed ())
+                ~river_limit_y:~%river_limit_y ~hospital_limit_y
+                ~speed:sim_speed ())
            ~last_update_timestamp:(new%js Js.date_now)##getTime
            () ])
 
