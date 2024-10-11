@@ -16,9 +16,13 @@ module type%shared M = sig
 
   val set_pos : float * float -> t -> t
   val contaminate_by_river_touch : river_limit_y:float -> t -> t
+  val update_color : elt:Html_types.div Eliom_content.Html.F.elt -> t -> t
 end
 
 module%shared M = struct
+  let healthy_creet_class_name = "healthy-creet"
+  let sick_creet_class_name = "sick-creet"
+
   type kind = Healthy | Sick
 
   type t =
@@ -146,4 +150,22 @@ module%shared M = struct
       y -. radius <= river_limit_y
     in
     if is_contaminated then {c with kind = Sick} else c
+
+  let match_class_name c =
+    match c.kind with
+    | Healthy -> healthy_creet_class_name
+    | Sick -> sick_creet_class_name
+
+  let update_color ~(elt : Html_types.div Eliom_content.Html.F.elt) c =
+    ignore elt;
+    ignore
+      [%client
+        (let creet_elt = Eliom_content.Html.To_dom.of_element ~%elt in
+         creet_elt##.classList##remove
+           (Js_of_ocaml.Js.string ~%healthy_creet_class_name);
+         creet_elt##.classList##remove
+           (Js_of_ocaml.Js.string ~%sick_creet_class_name);
+         creet_elt##.classList##add
+           (Js_of_ocaml.Js.string ~%(match_class_name c))
+         : unit)]
 end

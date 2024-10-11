@@ -77,6 +77,18 @@ html {
     }
 }
 
+.healthy-creet {
+    &>div {
+        background-color: rgb(107 33 168);
+    }
+}
+
+.sick-creet {
+    &>div {
+        background-color: rgb(251 113 133);
+    }
+}
+
 // TAILWIND //
 
 // Layout

@@ -27,6 +27,7 @@ let%client effect ~creet:initial_creet ~limits ~elt () =
     in
     creet_elt##.style##.left := Js.string (Utils.px_of_float x);
     creet_elt##.style##.top := Js.string (Utils.px_of_float y);
+    Creet.M.update_color ~elt creet;
     creet_ref := new_creet;
     let%lwt _ = Js_of_ocaml_lwt.Lwt_js.sleep Defaults.refresh_rate in
     creet_loop ~creet:creet_ref ~last_update_timestamp:timestamp ()
@@ -79,7 +80,7 @@ let%shared c ~creet:creet_ref ~(limits : float * float) () =
                  (Utils.px_of_float (radius *. 2.))
                  (Utils.px_of_float (radius *. 2.))
                  (Utils.px_of_float Creet.M.grab_offset)) ]
-        [div ~a:[a_class ["size-full"; "bg-purple-800"; "rounded-full"]] []])
+        [div ~a:[a_class ["size-full"; "rounded-full"]] []])
   in
   let _ =
     [%client (effect ~creet:~%creet_ref ~limits:~%limits ~elt:~%elt () : unit)]
