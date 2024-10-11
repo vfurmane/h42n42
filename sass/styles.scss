@@ -162,6 +162,10 @@ html {
     margin-right: auto;
 }
 
+.\[\&\:not\(\:last-child\)\]\:mb-1 {
+    margin-bottom: 0.25rem;
+}
+
 // Sizing
 
 .w-full {
