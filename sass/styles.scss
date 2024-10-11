@@ -103,6 +103,14 @@ html {
 
 // Flexbox & Grid
 
+.flex-col {
+    flex-direction: column;
+}
+
+.grow {
+    flex-grow: 1;
+}
+
 .gap-16 {
     gap: 4rem;
 }
@@ -178,6 +186,10 @@ html {
 
 .bg-green-300 {
     background-color: rgb(134 239 172);
+}
+
+.bg-teal-800 {
+    background-color: rgb(17 94 89);
 }
 
 .bg-purple-800 {

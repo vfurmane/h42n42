@@ -1,6 +1,7 @@
 let%shared limit_x = 900.
 let%shared limit_y = 675.
 let%shared limits = limit_x, limit_y
+let%shared river_limit_y = 28.
 let%shared base_creets_nbr = 5
 let%shared sim_speed_rate = 1. /. 60.
 
@@ -33,15 +34,24 @@ let%shared c () =
       div
         ~a:
           [ a_class
-              [ "overflow-hidden"
+              [ "flex"
+              ; "overflow-hidden"
               ; "relative"
+              ; "flex-col"
               ; Format.sprintf "w-[%s]" (Utils.px_of_float limit_x)
               ; Format.sprintf "h-[%s]" (Utils.px_of_float limit_y)
-              ; "bg-green-300"
               ; "select-none" ] ]
-        (List.map
-           (fun creet -> H42n42_simulation_creet.c ~creet ~limits ())
-           creets))
+        ([ div
+             ~a:
+               [ a_class ["bg-teal-800"]
+               ; a_style
+                   (Format.sprintf "height: %s"
+                      (Utils.px_of_float river_height)) ]
+             []
+         ; div ~a:[a_class ["grow"; "bg-green-300"]] [] ]
+        @ List.map
+            (fun creet -> H42n42_simulation_creet.c ~creet ~limits ())
+            creets))
   in
   let _ =
     [%client
