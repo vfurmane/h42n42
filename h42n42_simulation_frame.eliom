@@ -20,7 +20,7 @@ let%client effect ~sim_speed ~creets ~elt () =
   ignore
     (Lwt.join
        [ sim_loop
-           ~sim:(Simulation.M.start ~creets ~speed:sim_speed ())
+           ~sim:(Simulation.M.start ~elt ~creets ~limits ~speed:sim_speed ())
            ~last_update_timestamp:(new%js Js.date_now)##getTime
            () ])
 
@@ -41,17 +41,14 @@ let%shared c () =
               ; Format.sprintf "w-[%s]" (Utils.px_of_float limit_x)
               ; Format.sprintf "h-[%s]" (Utils.px_of_float limit_y)
               ; "select-none" ] ]
-        ([ div
-             ~a:
-               [ a_class ["bg-teal-800"]
-               ; a_style
-                   (Format.sprintf "height: %s"
-                      (Utils.px_of_float river_height)) ]
-             []
-         ; div ~a:[a_class ["grow"; "bg-green-300"]] [] ]
-        @ List.map
-            (fun creet -> H42n42_simulation_creet.c ~creet ~limits ())
-            creets))
+        [ div
+            ~a:
+              [ a_class ["bg-teal-800"]
+              ; a_style
+                  (Format.sprintf "height: %s" (Utils.px_of_float river_height))
+              ]
+            []
+        ; div ~a:[a_class ["grow"; "bg-green-300"]] [] ])
   in
   let _ =
     [%client
