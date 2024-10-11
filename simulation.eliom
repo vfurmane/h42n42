@@ -93,6 +93,7 @@ module%client M : M = struct
 
   let contaminate_creets sim =
     let creets = sim.creets in
+    let raw_creets = List.map (fun (_, creet) -> !creet) creets in
     let new_creets =
       List.map
         (fun (creet_elt, creet_ref) ->
@@ -100,6 +101,7 @@ module%client M : M = struct
            let new_creet =
              Creet.M.contaminate_by_river_touch ~river_limit_y:sim.river_limit_y
                creet
+             |> Creet.M.contaminate_by_sick_touch raw_creets
            in
            (let new_radius = Creet.M.get_radius new_creet in
             creet_elt##.style##.width

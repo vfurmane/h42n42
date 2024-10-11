@@ -39,6 +39,7 @@ module%shared M = struct
   let healthy_radius = 24.
   let healthy_speed = 100.
   let rotation_prob = 1. /. 40.
+  let contaminate_prob = 2. /. 100.
 
   let ran_spawn ~sim_speed ~limits:(limit_x, limit_y) () =
     let radius = healthy_radius in
@@ -155,6 +156,30 @@ module%shared M = struct
     let is_contaminated =
       let _, y = c.pos and radius = c.radius in
       y -. radius <= river_limit_y
+    in
+    if is_contaminated then {c with kind = Sick} else c
+
+  let are_creets_touching c1 c2 =
+    let are_creets_touching_axis a1 a2 r1 r2 =
+      (a1 -. r1 < a2 +. r2 && a1 -. r1 > a2 -. r2)
+      || (a1 +. r1 > a2 -. r2 && a1 +. r1 < a2 +. r2)
+    in
+    let x1, y1 = get_pos c1
+    and x2, y2 = get_pos c2
+    and r1 = c1.radius
+    and r2 = c2.radius in
+    are_creets_touching_axis x1 x2 r1 r2 && are_creets_touching_axis y1 y2 r1 r2
+
+  let contaminate_by_sick_touch creets c =
+    let is_contaminated =
+      List.exists
+        (fun creet ->
+           creet.kind = Sick
+           && are_creets_touching creet c
+           &&
+           let contaminate_prob_random = Random.float 1. in
+           contaminate_prob_random <= contaminate_prob)
+        creets
     in
     if is_contaminated then {c with kind = Sick} else c
 
