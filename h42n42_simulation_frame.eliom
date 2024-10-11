@@ -3,7 +3,7 @@ let%shared limit_y = 675.
 let%shared limits = limit_x, limit_y
 let%shared river_limit_y = 28.
 let%shared hospital_limit_y = 72.
-let%shared base_creets_nbr = 5
+let%shared base_creets_nbr = 3
 let%shared sim_speed_rate = 1. /. 90.
 
 let%client effect ~sim_speed ~(creets : Creet.M.t list) ~elt () =
