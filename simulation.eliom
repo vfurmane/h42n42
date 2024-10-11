@@ -64,7 +64,7 @@ module%client M : M = struct
       let new_creet = Creet.M.ran_spawn ~sim_speed:sim.speed ~limits () in
       let new_creet_ref = ref new_creet in
       let seconds_before_new_spawn =
-        Utils.random_float_in_range ~min:4.5 ~max:12.
+        Utils.random_float_in_range ~min:7.5 ~max:16.
       in
       let new_creet_elt =
         Eliom_content.Html.To_dom.of_element
