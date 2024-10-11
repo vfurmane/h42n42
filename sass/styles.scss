@@ -113,6 +113,10 @@ html {
     position: relative;
 }
 
+.z-20 {
+    z-index: 20;
+}
+
 // Flexbox & Grid
 
 .flex-col {
@@ -194,7 +198,17 @@ html {
     height: 100%;
 }
 
+// Typography
+
+.text-white {
+    color: rgb(255 255 255);
+}
+
 // Backgrounds
+
+.bg-black\/20 {
+    background-color: rgba(0, 0, 0, .2);
+}
 
 .bg-slate-300 {
     background-color: rgb(203 213 225);
@@ -228,6 +242,12 @@ html {
 
 .rounded-full {
     border-radius: 9999px;
+}
+
+// Filters
+
+.backdrop-blur-sm {
+    backdrop-filter: blur(4px);
 }
 
 // Interactivity

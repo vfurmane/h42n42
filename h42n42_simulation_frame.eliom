@@ -8,6 +8,7 @@ let%shared sim_speed_rate = 1. /. 90.
 
 let%client effect ~sim_speed ~(creets : Creet.M.t list) ~elt () =
   let open Js_of_ocaml in
+  let game_over_elt = H42n42_simulation_frame_game_over.c () in
   let rec sim_loop ~sim ~last_update_timestamp () =
     let timestamp = (new%js Js.date_now)##getTime in
     let elapsed_time = (timestamp -. last_update_timestamp) /. 1000. in
@@ -17,8 +18,15 @@ let%client effect ~sim_speed ~(creets : Creet.M.t list) ~elt () =
       |> Simulation.M.update_speed ~elapsed_time ~speed_rate:sim_speed_rate
       |> Simulation.M.contaminate_creets |> Simulation.M.heal_creets
     in
-    let%lwt _ = Js_of_ocaml_lwt.Lwt_js.sleep Defaults.refresh_rate in
-    sim_loop ~sim ~last_update_timestamp:timestamp ()
+    if Simulation.M.is_game_over sim
+    then
+      Lwt.return
+        (Js_of_ocaml.Dom.appendChild
+           (Eliom_content.Html.To_dom.of_element elt)
+           (Eliom_content.Html.To_dom.of_element game_over_elt))
+    else
+      let%lwt _ = Js_of_ocaml_lwt.Lwt_js.sleep Defaults.refresh_rate in
+      sim_loop ~sim ~last_update_timestamp:timestamp ()
   in
   ignore
     (Lwt.join

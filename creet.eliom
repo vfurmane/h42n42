@@ -18,6 +18,7 @@ module type%shared M = sig
   val contaminate_by_river_touch : river_limit_y:float -> t -> t
   val update_color : elt:Html_types.div Eliom_content.Html.F.elt -> t -> t
   val heal_by_hospital_touch : hospital_limit_y:float -> t -> t
+  val is_healthy : t -> t
 end
 
 module%shared M = struct
@@ -207,4 +208,6 @@ module%shared M = struct
       y >= limit_y -. hospital_limit_y
     in
     if is_healed then {c with kind = Healthy} else c
+
+  let is_healthy c = c.kind = Healthy
 end

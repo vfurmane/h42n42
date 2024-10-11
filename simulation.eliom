@@ -23,6 +23,7 @@ module type%client M = sig
   val update_speed : elapsed_time:float -> speed_rate:float -> t -> t
   val contaminate_creets : t -> t
   val heal_creets : t -> t
+  val is_game_over : t -> bool
 end
 
 module%client M : M = struct
@@ -129,4 +130,12 @@ module%client M : M = struct
         creets
     in
     {sim with creets = new_creets}
+
+  let is_game_over {creets} =
+    List.exists
+      (fun (_, creet_ref) ->
+         let creet = !creet_ref in
+         Creet.M.is_healthy creet)
+      creets
+    = false
 end
