@@ -5,6 +5,7 @@ module type%client M = sig
      elt:Html_types.div Eliom_content.Html.F.elt
     -> speed:float ref
     -> limits:float * float
+    -> river_limit_y:float
     -> creets:Creet.M.t list
     -> unit
     -> t
@@ -17,16 +18,18 @@ module type%client M = sig
     -> t
 
   val update_speed : elapsed_time:float -> speed_rate:float -> t -> t
+  val contaminate_creets : t -> t
 end
 
 module%client M : M = struct
   type t =
     { speed : float ref
+    ; river_limit_y : float
     ; creets :
         (Js_of_ocaml.Dom_html.element Js_of_ocaml.Js.t * Creet.M.t ref) list
     ; time_before_next_spawn : float }
 
-  let start ~elt ~speed ~limits ~creets () =
+  let start ~elt ~speed ~limits ~river_limit_y ~creets () =
     let creets =
       List.map
         (fun creet ->
@@ -41,7 +44,7 @@ module%client M : M = struct
            new_creet_elt, new_creet_ref)
         creets
     in
-    {speed; creets; time_before_next_spawn = 0.}
+    {speed; river_limit_y; creets; time_before_next_spawn = 0.}
 
   let random_spawn ~elt ~timestamp ~limits sim =
     let is_spawning = timestamp > sim.time_before_next_spawn in
@@ -68,4 +71,25 @@ module%client M : M = struct
   let update_speed ~elapsed_time ~speed_rate sim =
     sim.speed := !(sim.speed) +. (elapsed_time *. speed_rate);
     sim
+
+  let contaminate_creets sim =
+    let creets = sim.creets in
+    let new_creets =
+      List.map
+        (fun (creet_elt, creet_ref) ->
+           let creet = !creet_ref in
+           let new_creet =
+             Creet.M.contaminate_by_river_touch ~river_limit_y:sim.river_limit_y
+               creet
+           in
+           (let new_radius = Creet.M.get_radius new_creet in
+            creet_elt##.style##.width
+            := Js_of_ocaml.Js.string (Utils.px_of_float (new_radius *. 2.));
+            creet_elt##.style##.height
+            := Js_of_ocaml.Js.string (Utils.px_of_float (new_radius *. 2.)));
+           creet_ref := new_creet;
+           creet_elt, creet_ref)
+        creets
+    in
+    {sim with creets = new_creets}
 end

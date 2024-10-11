@@ -15,11 +15,15 @@ module type%shared M = sig
     -> t
 
   val set_pos : float * float -> t -> t
+  val contaminate_by_river_touch : river_limit_y:float -> t -> t
 end
 
 module%shared M = struct
+  type kind = Healthy | Sick
+
   type t =
     { sim_speed : float ref
+    ; kind : kind
     ; pos : float * float
     ; radius : float
     ; speed : float
@@ -41,10 +45,17 @@ module%shared M = struct
     let speed = healthy_speed in
     let direction = Random.float (2. *. Float.pi) in
     let time_before_next_rotation = 0. in
-    {sim_speed; pos; radius; speed; direction; time_before_next_rotation}
+    { sim_speed
+    ; kind = Healthy
+    ; pos
+    ; radius
+    ; speed
+    ; direction
+    ; time_before_next_rotation }
 
   let spawn ~sim_speed pos =
     { sim_speed
+    ; kind = Healthy
     ; pos
     ; radius = healthy_radius
     ; speed = healthy_speed
@@ -128,4 +139,11 @@ module%shared M = struct
       else y
     in
     {c with pos = new_x, new_y}
+
+  let contaminate_by_river_touch ~river_limit_y c =
+    let is_contaminated =
+      let _, y = c.pos and radius = c.radius in
+      y -. radius <= river_limit_y
+    in
+    if is_contaminated then {c with kind = Sick} else c
 end

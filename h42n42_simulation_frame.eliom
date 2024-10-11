@@ -13,6 +13,7 @@ let%client effect ~sim_speed ~(creets : Creet.M.t list) ~elt () =
     let sim =
       Simulation.M.random_spawn ~elt ~timestamp ~limits:~%limits sim
       |> Simulation.M.update_speed ~elapsed_time ~speed_rate:sim_speed_rate
+      |> Simulation.M.contaminate_creets
     in
     let%lwt _ = Js_of_ocaml_lwt.Lwt_js.sleep Defaults.refresh_rate in
     sim_loop ~sim ~last_update_timestamp:timestamp ()
@@ -20,7 +21,9 @@ let%client effect ~sim_speed ~(creets : Creet.M.t list) ~elt () =
   ignore
     (Lwt.join
        [ sim_loop
-           ~sim:(Simulation.M.start ~elt ~creets ~limits ~speed:sim_speed ())
+           ~sim:
+             (Simulation.M.start ~elt ~creets ~limits
+                ~river_limit_y:~%river_limit_y ~speed:sim_speed ())
            ~last_update_timestamp:(new%js Js.date_now)##getTime
            () ])
 
@@ -45,8 +48,8 @@ let%shared c () =
             ~a:
               [ a_class ["bg-teal-800"]
               ; a_style
-                  (Format.sprintf "height: %s" (Utils.px_of_float river_height))
-              ]
+                  (Format.sprintf "height: %s"
+                     (Utils.px_of_float river_limit_y)) ]
             []
         ; div ~a:[a_class ["grow"; "bg-green-300"]] [] ])
   in
