@@ -2,6 +2,7 @@ let%shared limit_x = 900.
 let%shared limit_y = 675.
 let%shared limits = limit_x, limit_y
 let%shared river_limit_y = 28.
+let%shared hospital_limit_y = 72.
 let%shared base_creets_nbr = 5
 let%shared sim_speed_rate = 1. /. 60.
 
@@ -51,7 +52,14 @@ let%shared c () =
                   (Format.sprintf "height: %s"
                      (Utils.px_of_float river_limit_y)) ]
             []
-        ; div ~a:[a_class ["grow"; "bg-green-300"]] [] ])
+        ; div ~a:[a_class ["grow"; "bg-green-300"]] []
+        ; div
+            ~a:
+              [ a_class ["bg-slate-300"]
+              ; a_style
+                  (Format.sprintf "height: %s"
+                     (Utils.px_of_float hospital_limit_y)) ]
+            [] ])
   in
   let _ =
     [%client
