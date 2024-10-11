@@ -24,8 +24,9 @@ let%client effect ~sim_speed ~(creets : Creet.M.t list) ~elt () =
     (Lwt.join
        [ sim_loop
            ~sim:
-             (Simulation.M.start ~elt ~creets ~limits
-                ~river_limit_y:~%river_limit_y ~hospital_limit_y
+             (Simulation.M.start ~elt
+                ~timestamp:(new%js Js.date_now)##getTime
+                ~creets ~limits ~river_limit_y:~%river_limit_y ~hospital_limit_y
                 ~speed:sim_speed ())
            ~last_update_timestamp:(new%js Js.date_now)##getTime
            () ])

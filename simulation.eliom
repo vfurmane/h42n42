@@ -3,6 +3,7 @@ module type%client M = sig
 
   val start :
      elt:Html_types.div Eliom_content.Html.F.elt
+    -> timestamp:float
     -> speed:float ref
     -> limits:float * float
     -> river_limit_y:float
@@ -34,7 +35,12 @@ module%client M : M = struct
         (Js_of_ocaml.Dom_html.element Js_of_ocaml.Js.t * Creet.M.t ref) list
     ; time_before_next_spawn : float }
 
-  let start ~elt ~speed ~limits ~river_limit_y ~hospital_limit_y ~creets () =
+  let start ~elt ~timestamp ~speed ~limits ~river_limit_y ~hospital_limit_y
+      ~creets ()
+    =
+    let seconds_before_new_spawn =
+      Utils.random_float_in_range ~min:7.5 ~max:16.
+    in
     let creets =
       List.map
         (fun creet ->
@@ -55,7 +61,8 @@ module%client M : M = struct
     ; river_limit_y
     ; hospital_limit_y
     ; creets
-    ; time_before_next_spawn = 0. }
+    ; time_before_next_spawn = timestamp +. (seconds_before_new_spawn *. 1000.)
+    }
 
   let random_spawn ~elt ~timestamp ~limits ~hospital_limit_y sim =
     let is_spawning = timestamp > sim.time_before_next_spawn in
