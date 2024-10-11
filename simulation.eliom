@@ -21,12 +21,15 @@ module type%client M = sig
 
   val update_speed : elapsed_time:float -> speed_rate:float -> t -> t
   val contaminate_creets : t -> t
+  val heal_creets : t -> t
 end
 
 module%client M : M = struct
   type t =
     { speed : float ref
+    ; limits : float * float
     ; river_limit_y : float
+    ; hospital_limit_y : float
     ; creets :
         (Js_of_ocaml.Dom_html.element Js_of_ocaml.Js.t * Creet.M.t ref) list
     ; time_before_next_spawn : float }
@@ -47,7 +50,12 @@ module%client M : M = struct
            new_creet_elt, new_creet_ref)
         creets
     in
-    {speed; river_limit_y; creets; time_before_next_spawn = 0.}
+    { speed
+    ; limits
+    ; river_limit_y
+    ; hospital_limit_y
+    ; creets
+    ; time_before_next_spawn = 0. }
 
   let random_spawn ~elt ~timestamp ~limits ~hospital_limit_y sim =
     let is_spawning = timestamp > sim.time_before_next_spawn in
@@ -91,6 +99,22 @@ module%client M : M = struct
             := Js_of_ocaml.Js.string (Utils.px_of_float (new_radius *. 2.));
             creet_elt##.style##.height
             := Js_of_ocaml.Js.string (Utils.px_of_float (new_radius *. 2.)));
+           creet_ref := new_creet;
+           creet_elt, creet_ref)
+        creets
+    in
+    {sim with creets = new_creets}
+
+  let heal_creets sim =
+    let creets = sim.creets in
+    let new_creets =
+      List.map
+        (fun (creet_elt, creet_ref) ->
+           let creet = !creet_ref in
+           let new_creet =
+             Creet.M.heal_by_hospital_touch ~limit_y:(snd sim.limits)
+               ~hospital_limit_y:sim.hospital_limit_y creet
+           in
            creet_ref := new_creet;
            creet_elt, creet_ref)
         creets

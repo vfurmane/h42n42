@@ -17,6 +17,7 @@ module type%shared M = sig
   val set_pos : float * float -> t -> t
   val contaminate_by_river_touch : river_limit_y:float -> t -> t
   val update_color : elt:Html_types.div Eliom_content.Html.F.elt -> t -> t
+  val heal_by_hospital_touch : hospital_limit_y:float -> t -> t
 end
 
 module%shared M = struct
@@ -174,4 +175,11 @@ module%shared M = struct
          creet_elt##.classList##add
            (Js_of_ocaml.Js.string ~%(match_class_name c))
          : unit)]
+
+  let heal_by_hospital_touch ~limit_y ~hospital_limit_y c =
+    let is_healed =
+      let _, y = c.pos in
+      y >= limit_y -. hospital_limit_y
+    in
+    if is_healed then {c with kind = Healthy} else c
 end

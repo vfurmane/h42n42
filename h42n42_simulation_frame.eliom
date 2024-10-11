@@ -15,7 +15,7 @@ let%client effect ~sim_speed ~(creets : Creet.M.t list) ~elt () =
       Simulation.M.random_spawn ~elt ~timestamp ~limits:~%limits
         ~hospital_limit_y:~%hospital_limit_y sim
       |> Simulation.M.update_speed ~elapsed_time ~speed_rate:sim_speed_rate
-      |> Simulation.M.contaminate_creets
+      |> Simulation.M.contaminate_creets |> Simulation.M.heal_creets
     in
     let%lwt _ = Js_of_ocaml_lwt.Lwt_js.sleep Defaults.refresh_rate in
     sim_loop ~sim ~last_update_timestamp:timestamp ()
