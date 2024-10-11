@@ -5,7 +5,7 @@ let%shared river_limit_y = 28.
 let%shared base_creets_nbr = 5
 let%shared sim_speed_rate = 1. /. 60.
 
-let%client effect ~sim_speed ~creets ~elt () =
+let%client effect ~sim_speed ~(creets : Creet.M.t list) ~elt () =
   let open Js_of_ocaml in
   let rec sim_loop ~sim ~last_update_timestamp () =
     let timestamp = (new%js Js.date_now)##getTime in

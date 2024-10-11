@@ -22,21 +22,23 @@ end
 module%client M : M = struct
   type t =
     { speed : float ref
-    ; creets : (Js_of_ocaml.Dom_html.element Js_of_ocaml.Js.t * Creet.M.t) list
+    ; creets :
+        (Js_of_ocaml.Dom_html.element Js_of_ocaml.Js.t * Creet.M.t ref) list
     ; time_before_next_spawn : float }
 
   let start ~elt ~speed ~limits ~creets () =
     let creets =
       List.map
         (fun creet ->
+           let new_creet_ref = ref creet in
            let new_creet_elt =
              Eliom_content.Html.To_dom.of_element
-               (H42n42_simulation_creet.c ~creet ~limits ())
+               (H42n42_simulation_creet.c ~creet:new_creet_ref ~limits ())
            in
            Js_of_ocaml.Dom.appendChild
              (Eliom_content.Html.To_dom.of_element elt)
              new_creet_elt;
-           new_creet_elt, creet)
+           new_creet_elt, new_creet_ref)
         creets
     in
     {speed; creets; time_before_next_spawn = 0.}
@@ -46,18 +48,19 @@ module%client M : M = struct
     if is_spawning
     then (
       let new_creet = Creet.M.ran_spawn ~sim_speed:sim.speed ~limits () in
+      let new_creet_ref = ref new_creet in
       let seconds_before_new_spawn =
         Utils.random_float_in_range ~min:4.5 ~max:12.
       in
       let new_creet_elt =
         Eliom_content.Html.To_dom.of_element
-          (H42n42_simulation_creet.c ~creet:new_creet ~limits ())
+          (H42n42_simulation_creet.c ~creet:new_creet_ref ~limits ())
       in
       Js_of_ocaml.Dom.appendChild
         (Eliom_content.Html.To_dom.of_element elt)
         new_creet_elt;
       { sim with
-        creets = (new_creet_elt, new_creet) :: sim.creets
+        creets = (new_creet_elt, new_creet_ref) :: sim.creets
       ; time_before_next_spawn =
           timestamp +. (seconds_before_new_spawn /. !(sim.speed) *. 1000.) })
     else sim

@@ -6,9 +6,10 @@ let%client effect ~creet:initial_creet ~limits ~elt () =
   let is_held = ref false in
   let parent_pos = ref (0., 0.) in
   let mouse_pos = ref (0, 0) in
-  let rec creet_loop ~creet ~last_update_timestamp () =
+  let rec creet_loop ~creet:creet_ref ~last_update_timestamp () =
     let timestamp = (new%js Js.date_now)##getTime in
     let elapsed_time = (timestamp -. last_update_timestamp) /. 1000. in
+    let creet = !creet_ref in
     let radius = Creet.M.get_radius creet in
     let new_creet =
       if !is_held = true
@@ -26,8 +27,9 @@ let%client effect ~creet:initial_creet ~limits ~elt () =
     in
     creet_elt##.style##.left := Js.string (Utils.px_of_float x);
     creet_elt##.style##.top := Js.string (Utils.px_of_float y);
+    creet_ref := new_creet;
     let%lwt _ = Js_of_ocaml_lwt.Lwt_js.sleep Defaults.refresh_rate in
-    creet_loop ~creet:new_creet ~last_update_timestamp:timestamp ()
+    creet_loop ~creet:creet_ref ~last_update_timestamp:timestamp ()
   in
   ignore
     (Lwt.join
@@ -61,7 +63,8 @@ let%client effect ~creet:initial_creet ~limits ~elt () =
                  creet_elt##.classList##remove (Js.string held_creet_class_name);
                  Lwt.return ()) ])) ])
 
-let%shared c ~creet ~(limits : float * float) () =
+let%shared c ~creet:creet_ref ~(limits : float * float) () =
+  let creet = !creet_ref in
   let radius = Creet.M.get_radius creet in
   let x, y = Utils.tl_of_center (Creet.M.get_pos creet) radius in
   let elt =
@@ -79,6 +82,6 @@ let%shared c ~creet ~(limits : float * float) () =
         [div ~a:[a_class ["size-full"; "bg-purple-800"; "rounded-full"]] []])
   in
   let _ =
-    [%client (effect ~creet:~%creet ~limits:~%limits ~elt:~%elt () : unit)]
+    [%client (effect ~creet:~%creet_ref ~limits:~%limits ~elt:~%elt () : unit)]
   in
   elt
