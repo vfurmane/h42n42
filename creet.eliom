@@ -157,7 +157,11 @@ module%shared M = struct
              then nearest_creet
              else
                match creet.kind with
-               | Healthy -> Some creet
+               | Healthy ->
+                   if let _, y = get_pos creet in
+                      y < limit_y -. hospital_limit_y
+                   then Some creet
+                   else nearest_creet
                | Sick _ -> nearest_creet)
           None !creets
       in
