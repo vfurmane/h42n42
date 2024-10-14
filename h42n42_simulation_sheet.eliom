@@ -14,7 +14,10 @@ let%shared c () =
               (List.map
                  (fun (label, color_cn, color_name) ->
                     li
-                      ~a:[a_class ["flex"; "[&:not(:last-child)]:mb-1"; "items-center"]]
+                      ~a:
+                        [ a_class
+                            ["flex"; "[&:not(:last-child)]:mb-1"; "items-center"]
+                        ]
                       [ div
                           ~a:
                             [ a_title (color_name ^ " color")
