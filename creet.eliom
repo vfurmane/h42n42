@@ -233,7 +233,7 @@ module%shared M = struct
 
   let contaminate kind c =
     let radius = if kind = Mean then mean_radius else sick_radius in
-    {c with kind = Sick kind; radius}
+    {c with kind = Sick kind; radius; speed = sick_speed}
 
   let contaminate_by_river_touch ~river_limit_y c =
     let is_contaminated =
