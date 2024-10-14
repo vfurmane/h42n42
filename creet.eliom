@@ -42,6 +42,7 @@ module%shared M = struct
   let grab_offset = 20.
   let healthy_radius = 24.
   let healthy_speed = 100.
+  let sick_speed = healthy_speed *. (1. -. 0.15)
   let rotation_prob = 1. /. 40.
   let contaminate_prob = 2. /. 100.
 
@@ -158,7 +159,7 @@ module%shared M = struct
     in
     {c with pos = new_x, new_y}
 
-  let contaminate c = {c with kind = Sick}
+  let contaminate c = {c with kind = Sick; speed = sick_speed}
 
   let contaminate_by_river_touch ~river_limit_y c =
     let is_contaminated =
