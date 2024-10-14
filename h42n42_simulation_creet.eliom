@@ -29,6 +29,11 @@ let%client effect ~creet:initial_creet ~limits ~hospital_limit_y ~elt () =
     in
     creet_elt##.style##.left := Js.string (Utils.px_of_float x);
     creet_elt##.style##.top := Js.string (Utils.px_of_float y);
+    (let new_radius = Creet.M.get_radius new_creet in
+     creet_elt##.style##.width
+     := Js_of_ocaml.Js.string (Utils.px_of_float (new_radius *. 2.));
+     creet_elt##.style##.height
+     := Js_of_ocaml.Js.string (Utils.px_of_float (new_radius *. 2.)));
     Creet.M.update_color ~elt creet;
     creet_ref := new_creet;
     let%lwt _ = Js_of_ocaml_lwt.Lwt_js.sleep Defaults.refresh_rate in

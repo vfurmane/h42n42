@@ -104,11 +104,6 @@ module%client M : M = struct
                creet
              |> Creet.M.contaminate_by_sick_touch raw_creets
            in
-           (let new_radius = Creet.M.get_radius new_creet in
-            creet_elt##.style##.width
-            := Js_of_ocaml.Js.string (Utils.px_of_float (new_radius *. 2.));
-            creet_elt##.style##.height
-            := Js_of_ocaml.Js.string (Utils.px_of_float (new_radius *. 2.)));
            creet_ref := new_creet;
            creet_elt, creet_ref)
         creets
