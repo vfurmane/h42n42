@@ -1,6 +1,9 @@
 let%shared c () =
   let creet_kinds =
-    ["Healthy", "bg-purple-800", "Purple"; "Sick", "bg-rose-400", "Rose"]
+    [ "Healthy", "bg-purple-800", "Purple"
+    ; "Sick", "bg-rose-400", "Rose"
+    ; "Berserk", "bg-fuchsia-950", "Fuchsia"
+    ; "Mean", "bg-yellow-400", "Yellow" ]
   in
   Eliom_content.Html.F.(
     section
