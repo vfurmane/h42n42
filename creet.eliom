@@ -145,6 +145,21 @@ module%shared M = struct
     then 0.0, 0.0 (* Handle zero-length vector *)
     else dx /. magnitude, dy /. magnitude
 
+  let natural_move ~timestamp ~elapsed_time ~limits:(limit_x, limit_y)
+      ~hospital_limit_y c
+    =
+    let c = random_rotation ~timestamp c in
+    let x, y = get_pos c in
+    let dx, dy = dir_to_coord c.direction in
+    let new_x = x +. (dx *. c.speed *. !(c.sim_speed) *. elapsed_time) in
+    let new_y = y +. (dy *. c.speed *. !(c.sim_speed) *. elapsed_time) in
+    let new_x, new_y, new_dx, new_dy =
+      bump_on_limits ~limits:(limit_x, limit_y) ~hospital_limit_y (new_x, new_y)
+        (dx, dy) (get_radius c)
+    in
+    let new_direction = Float.atan2 (0. -. new_dy) new_dx in
+    {c with pos = new_x, new_y; direction = new_direction}
+
   let move ~timestamp ~elapsed_time ~creets ~limits:(limit_x, limit_y)
       ~hospital_limit_y c
     =
@@ -166,7 +181,9 @@ module%shared M = struct
           None !creets
       in
       match nearest_creet with
-      | None -> c
+      | None ->
+          natural_move ~timestamp ~elapsed_time ~limits:(limit_x, limit_y)
+            ~hospital_limit_y c
       | Some nearest_creet ->
           let x, y = get_pos c in
           let target_x, target_y = get_pos nearest_creet in
@@ -187,17 +204,8 @@ module%shared M = struct
           in
           {c with pos = new_x, new_y; direction = new_direction}
     else
-      let c = random_rotation ~timestamp c in
-      let x, y = get_pos c in
-      let dx, dy = dir_to_coord c.direction in
-      let new_x = x +. (dx *. c.speed *. !(c.sim_speed) *. elapsed_time) in
-      let new_y = y +. (dy *. c.speed *. !(c.sim_speed) *. elapsed_time) in
-      let new_x, new_y, new_dx, new_dy =
-        bump_on_limits ~limits:(limit_x, limit_y) ~hospital_limit_y
-          (new_x, new_y) (dx, dy) (get_radius c)
-      in
-      let new_direction = Float.atan2 (0. -. new_dy) new_dx in
-      {c with pos = new_x, new_y; direction = new_direction}
+      natural_move ~timestamp ~elapsed_time ~limits:(limit_x, limit_y)
+        ~hospital_limit_y c
 
   let set_pos ~limits:(limit_x, limit_y) (x, y) c =
     let r = c.radius in
