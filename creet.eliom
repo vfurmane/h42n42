@@ -158,6 +158,8 @@ module%shared M = struct
     in
     {c with pos = new_x, new_y}
 
+  let contaminate c = {c with kind = Sick}
+
   let contaminate_by_river_touch ~river_limit_y c =
     let is_contaminated =
       c.is_held = false
@@ -165,7 +167,7 @@ module%shared M = struct
       let _, y = c.pos and radius = c.radius in
       y -. radius <= river_limit_y
     in
-    if is_contaminated then {c with kind = Sick} else c
+    if is_contaminated then contaminate c else c
 
   let are_creets_touching c1 c2 =
     let are_creets_touching_axis a1 a2 r1 r2 =
@@ -190,7 +192,7 @@ module%shared M = struct
               contaminate_prob_random <= contaminate_prob)
            creets
     in
-    if is_contaminated then {c with kind = Sick} else c
+    if is_contaminated then contaminate c else c
 
   let match_class_name c =
     match c.kind with
