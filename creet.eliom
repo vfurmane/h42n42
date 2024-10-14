@@ -180,6 +180,11 @@ module%shared M = struct
           let new_y =
             y +. (new_dy *. c.speed *. !(c.sim_speed) *. elapsed_time)
           in
+          let new_y =
+            if new_y +. c.radius >= limit_y -. hospital_limit_y
+            then limit_y -. hospital_limit_y -. c.radius
+            else new_y
+          in
           {c with pos = new_x, new_y; direction = new_direction}
     else
       let c = random_rotation ~timestamp c in
