@@ -218,7 +218,7 @@ module%shared M = struct
       let _, y = c.pos in
       y >= limit_y -. hospital_limit_y
     in
-    if is_healed then {c with kind = Healthy} else c
+    if is_healed then {c with kind = Healthy; speed = healthy_speed} else c
 
   let is_healthy c = c.kind = Healthy
   let hold c = {c with is_held = true}
