@@ -1,6 +1,7 @@
 let%client held_creet_class_name = "held-creet"
 
-let%client effect ~creet:initial_creet ~limits ~hospital_limit_y ~elt () =
+let%client effect ~creets ~creet:initial_creet ~limits ~hospital_limit_y ~elt ()
+  =
   let open Js_of_ocaml in
   let creet_elt = Eliom_content.Html.To_dom.of_element elt in
   let is_held = ref false in
@@ -23,7 +24,8 @@ let%client effect ~creet:initial_creet ~limits ~hospital_limit_y ~elt () =
       else
         creet |> Creet.M.release
         |> Creet.M.grow_berserk ~elapsed_time
-        |> Creet.M.move ~timestamp ~elapsed_time ~limits ~hospital_limit_y
+        |> Creet.M.move ~timestamp ~elapsed_time ~creets ~limits
+             ~hospital_limit_y
     in
     let x, y =
       (Creet.M.get_pos new_creet |> Utils.tl_of_center)
@@ -73,8 +75,8 @@ let%client effect ~creet:initial_creet ~limits ~hospital_limit_y ~elt () =
                  creet_elt##.classList##remove (Js.string held_creet_class_name);
                  Lwt.return ()) ])) ])
 
-let%shared c ~creet:creet_ref ~(limits : float * float)
-    ~(hospital_limit_y : float) ()
+let%shared c ~(creets : Creet.M.t list ref) ~creet:creet_ref
+    ~(limits : float * float) ~(hospital_limit_y : float) ()
   =
   let creet = !creet_ref in
   let radius = Creet.M.get_radius creet in
@@ -95,7 +97,7 @@ let%shared c ~creet:creet_ref ~(limits : float * float)
   in
   let _ =
     [%client
-      (effect ~creet:~%creet_ref ~limits:~%limits
+      (effect ~creets:~%creets ~creet:~%creet_ref ~limits:~%limits
          ~hospital_limit_y:~%hospital_limit_y ~elt:~%elt ()
        : unit)]
   in

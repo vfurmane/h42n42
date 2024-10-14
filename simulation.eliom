@@ -8,13 +8,14 @@ module type%client M = sig
     -> limits:float * float
     -> river_limit_y:float
     -> hospital_limit_y:float
-    -> creets:Creet.M.t list
+    -> creets:Creet.M.t list ref
     -> unit
     -> t
 
   val random_spawn :
      elt:Html_types.div Eliom_content.Html.F.elt
     -> timestamp:float
+    -> creets:Creet.M.t list ref
     -> limits:float * float
     -> hospital_limit_y:float
     -> t
@@ -24,6 +25,7 @@ module type%client M = sig
   val contaminate_creets : t -> t
   val heal_creets : t -> t
   val is_game_over : t -> bool
+  val get_creets : t -> Creet.M.t list
 end
 
 module%client M : M = struct
@@ -48,14 +50,14 @@ module%client M : M = struct
            let new_creet_ref = ref creet in
            let new_creet_elt =
              Eliom_content.Html.To_dom.of_element
-               (H42n42_simulation_creet.c ~creet:new_creet_ref ~limits
+               (H42n42_simulation_creet.c ~creets ~creet:new_creet_ref ~limits
                   ~hospital_limit_y ())
            in
            Js_of_ocaml.Dom.appendChild
              (Eliom_content.Html.To_dom.of_element elt)
              new_creet_elt;
            new_creet_elt, new_creet_ref)
-        creets
+        !creets
     in
     { speed
     ; limits
@@ -65,7 +67,7 @@ module%client M : M = struct
     ; time_before_next_spawn = timestamp +. (seconds_before_new_spawn *. 1000.)
     }
 
-  let random_spawn ~elt ~timestamp ~limits ~hospital_limit_y sim =
+  let random_spawn ~elt ~timestamp ~creets ~limits ~hospital_limit_y sim =
     let is_spawning = timestamp > sim.time_before_next_spawn in
     if is_spawning
     then (
@@ -76,7 +78,7 @@ module%client M : M = struct
       in
       let new_creet_elt =
         Eliom_content.Html.To_dom.of_element
-          (H42n42_simulation_creet.c ~creet:new_creet_ref ~limits
+          (H42n42_simulation_creet.c ~creets ~creet:new_creet_ref ~limits
              ~hospital_limit_y ())
       in
       Js_of_ocaml.Dom.appendChild
@@ -133,4 +135,6 @@ module%client M : M = struct
          Creet.M.is_healthy creet)
       creets
     = false
+
+  let get_creets {creets} = List.map (fun (_, creet_ref) -> !creet_ref) creets
 end

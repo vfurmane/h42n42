@@ -10,6 +10,7 @@ module type%shared M = sig
   val move :
      timestamp:float
     -> elapsed_time:float
+    -> t list ref
     -> limits:float * float
     -> t
     -> t
@@ -28,8 +29,9 @@ module%shared M = struct
   let healthy_creet_class_name = "healthy-creet"
   let sick_creet_class_name = "sick-creet"
   let berserk_creet_class_name = "berserk-creet"
+  let mean_creet_class_name = "mean-creet"
 
-  type sick_kind = Normal | Berserk
+  type sick_kind = Normal | Berserk | Mean
   type kind = Healthy | Sick of sick_kind
 
   type t =
@@ -46,11 +48,14 @@ module%shared M = struct
   let healthy_radius = 24.
   let healthy_speed = 100.
   let sick_speed = healthy_speed *. (1. -. 0.15)
+  let sick_radius = healthy_radius
   let berserk_radius = healthy_radius *. 4.
   let berserk_growing_rate = 2.
+  let mean_radius = healthy_radius *. (1. -. 0.15)
   let rotation_prob = 1. /. 40.
   let contaminate_prob = 2. /. 100.
   let become_berserk_prob = 10. /. 100.
+  let become_mean_prob = 10. /. 100.
 
   let ran_spawn ~sim_speed ~limits:(limit_x, limit_y) () =
     let radius = healthy_radius in
@@ -134,20 +139,56 @@ module%shared M = struct
     in
     new_x, new_y, new_dx, new_dy
 
-  let move ~timestamp ~elapsed_time ~limits:(limit_x, limit_y) ~hospital_limit_y
-      c
+  let normalize_direction (dx, dy) =
+    let magnitude = sqrt ((dx *. dx) +. (dy *. dy)) in
+    if magnitude = 0.0
+    then 0.0, 0.0 (* Handle zero-length vector *)
+    else dx /. magnitude, dy /. magnitude
+
+  let move ~timestamp ~elapsed_time ~creets ~limits:(limit_x, limit_y)
+      ~hospital_limit_y c
     =
-    let c = random_rotation ~timestamp c in
-    let x, y = get_pos c in
-    let dx, dy = dir_to_coord c.direction in
-    let new_x = x +. (dx *. c.speed *. !(c.sim_speed) *. elapsed_time) in
-    let new_y = y +. (dy *. c.speed *. !(c.sim_speed) *. elapsed_time) in
-    let new_x, new_y, new_dx, new_dy =
-      bump_on_limits ~limits:(limit_x, limit_y) ~hospital_limit_y (new_x, new_y)
-        (dx, dy) (get_radius c)
-    in
-    let new_direction = Float.atan2 (0. -. new_dy) new_dx in
-    {c with pos = new_x, new_y; direction = new_direction}
+    if c.kind = Sick Mean
+    then
+      let nearest_creet =
+        List.fold_left
+          (fun nearest_creet creet ->
+             if creet = c
+             then nearest_creet
+             else
+               match creet.kind with
+               | Healthy -> Some creet
+               | Sick _ -> nearest_creet)
+          None !creets
+      in
+      match nearest_creet with
+      | None -> c
+      | Some nearest_creet ->
+          let x, y = get_pos c in
+          let target_x, target_y = get_pos nearest_creet in
+          let new_dx, new_dy = target_x -. x, target_y -. y in
+          let new_dx, new_dy = normalize_direction (new_dx, new_dy) in
+          let new_direction = Float.atan2 (0. -. new_dy) new_dx in
+          let new_dx, new_dy = dir_to_coord new_direction in
+          let new_x =
+            x +. (new_dx *. c.speed *. !(c.sim_speed) *. elapsed_time)
+          in
+          let new_y =
+            y +. (new_dy *. c.speed *. !(c.sim_speed) *. elapsed_time)
+          in
+          {c with pos = new_x, new_y; direction = new_direction}
+    else
+      let c = random_rotation ~timestamp c in
+      let x, y = get_pos c in
+      let dx, dy = dir_to_coord c.direction in
+      let new_x = x +. (dx *. c.speed *. !(c.sim_speed) *. elapsed_time) in
+      let new_y = y +. (dy *. c.speed *. !(c.sim_speed) *. elapsed_time) in
+      let new_x, new_y, new_dx, new_dy =
+        bump_on_limits ~limits:(limit_x, limit_y) ~hospital_limit_y
+          (new_x, new_y) (dx, dy) (get_radius c)
+      in
+      let new_direction = Float.atan2 (0. -. new_dy) new_dx in
+      {c with pos = new_x, new_y; direction = new_direction}
 
   let set_pos ~limits:(limit_x, limit_y) (x, y) c =
     let r = c.radius in
@@ -167,9 +208,15 @@ module%shared M = struct
 
   let rand_kind () =
     let kind_prob_random = Random.float 1. in
-    if kind_prob_random <= become_berserk_prob then Berserk else Normal
+    if kind_prob_random <= become_berserk_prob
+    then Berserk
+    else if kind_prob_random <= become_berserk_prob +. become_mean_prob
+    then Mean
+    else Normal
 
-  let contaminate kind c = {c with kind = Sick kind; speed = sick_speed}
+  let contaminate kind c =
+    let radius = if kind = Mean then mean_radius else sick_radius in
+    {c with kind = Sick kind; radius}
 
   let contaminate_by_river_touch ~river_limit_y c =
     let is_contaminated =
@@ -221,7 +268,8 @@ module%shared M = struct
     | Sick sk -> (
       match sk with
       | Normal -> sick_creet_class_name
-      | Berserk -> berserk_creet_class_name)
+      | Berserk -> berserk_creet_class_name
+      | Mean -> mean_creet_class_name)
 
   let update_color ~(elt : Html_types.div Eliom_content.Html.F.elt) c =
     ignore elt;
@@ -234,6 +282,8 @@ module%shared M = struct
            (Js_of_ocaml.Js.string ~%sick_creet_class_name);
          creet_elt##.classList##remove
            (Js_of_ocaml.Js.string ~%berserk_creet_class_name);
+         creet_elt##.classList##remove
+           (Js_of_ocaml.Js.string ~%mean_creet_class_name);
          creet_elt##.classList##add
            (Js_of_ocaml.Js.string ~%(match_class_name c))
          : unit)]
