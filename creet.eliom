@@ -216,7 +216,9 @@ module%shared M = struct
   let heal_by_hospital_touch ~limit_y ~hospital_limit_y c =
     let is_healed =
       let _, y = c.pos in
-      y >= limit_y -. hospital_limit_y
+      if c.radius <= hospital_limit_y
+      then y >= limit_y -. hospital_limit_y
+      else y +. c.radius >= limit_y
     in
     if is_healed then {c with kind = Healthy; speed = healthy_speed} else c
 
