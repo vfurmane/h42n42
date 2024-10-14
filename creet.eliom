@@ -21,13 +21,16 @@ module type%shared M = sig
   val is_healthy : t -> t
   val hold : t -> t
   val release : t -> t
+  val grow_berserk : t -> t
 end
 
 module%shared M = struct
   let healthy_creet_class_name = "healthy-creet"
   let sick_creet_class_name = "sick-creet"
+  let berserk_creet_class_name = "berserk-creet"
 
-  type kind = Healthy | Sick
+  type sick_kind = Normal | Berserk
+  type kind = Healthy | Sick of sick_kind
 
   type t =
     { sim_speed : float ref
@@ -43,8 +46,11 @@ module%shared M = struct
   let healthy_radius = 24.
   let healthy_speed = 100.
   let sick_speed = healthy_speed *. (1. -. 0.15)
+  let berserk_radius = healthy_radius *. 4.
+  let berserk_growing_rate = 2.
   let rotation_prob = 1. /. 40.
   let contaminate_prob = 2. /. 100.
+  let become_berserk_prob = 10. /. 100.
 
   let ran_spawn ~sim_speed ~limits:(limit_x, limit_y) () =
     let radius = healthy_radius in
@@ -159,16 +165,24 @@ module%shared M = struct
     in
     {c with pos = new_x, new_y}
 
-  let contaminate c = {c with kind = Sick; speed = sick_speed}
+  let rand_kind () =
+    let kind_prob_random = Random.float 1. in
+    if kind_prob_random <= become_berserk_prob then Berserk else Normal
+
+  let contaminate kind c = {c with kind = Sick kind; speed = sick_speed}
 
   let contaminate_by_river_touch ~river_limit_y c =
     let is_contaminated =
-      c.is_held = false
+      c.kind = Healthy && c.is_held = false
       &&
       let _, y = c.pos and radius = c.radius in
       y -. radius <= river_limit_y
     in
-    if is_contaminated then contaminate c else c
+    if is_contaminated
+    then
+      let kind = rand_kind () in
+      contaminate kind c
+    else c
 
   let are_creets_touching c1 c2 =
     let are_creets_touching_axis a1 a2 r1 r2 =
@@ -183,22 +197,31 @@ module%shared M = struct
 
   let contaminate_by_sick_touch creets c =
     let is_contaminated =
-      c.is_held = false
+      c.kind = Healthy && c.is_held = false && c.is_held = false
       && List.exists
            (fun creet ->
-              creet.kind = Sick
-              && are_creets_touching creet c
-              &&
-              let contaminate_prob_random = Random.float 1. in
-              contaminate_prob_random <= contaminate_prob)
+              match creet.kind with
+              | Healthy -> false
+              | Sick _ ->
+                  are_creets_touching creet c
+                  &&
+                  let contaminate_prob_random = Random.float 1. in
+                  contaminate_prob_random <= contaminate_prob)
            creets
     in
-    if is_contaminated then contaminate c else c
+    if is_contaminated
+    then
+      let kind = rand_kind () in
+      contaminate kind c
+    else c
 
   let match_class_name c =
     match c.kind with
     | Healthy -> healthy_creet_class_name
-    | Sick -> sick_creet_class_name
+    | Sick sk -> (
+      match sk with
+      | Normal -> sick_creet_class_name
+      | Berserk -> berserk_creet_class_name)
 
   let update_color ~(elt : Html_types.div Eliom_content.Html.F.elt) c =
     ignore elt;
@@ -209,6 +232,8 @@ module%shared M = struct
            (Js_of_ocaml.Js.string ~%healthy_creet_class_name);
          creet_elt##.classList##remove
            (Js_of_ocaml.Js.string ~%sick_creet_class_name);
+         creet_elt##.classList##remove
+           (Js_of_ocaml.Js.string ~%berserk_creet_class_name);
          creet_elt##.classList##add
            (Js_of_ocaml.Js.string ~%(match_class_name c))
          : unit)]
@@ -220,9 +245,20 @@ module%shared M = struct
       then y >= limit_y -. hospital_limit_y
       else y +. c.radius >= limit_y
     in
-    if is_healed then {c with kind = Healthy; speed = healthy_speed} else c
+    if is_healed
+    then {c with kind = Healthy; radius = healthy_radius; speed = healthy_speed}
+    else c
 
   let is_healthy c = c.kind = Healthy
   let hold c = {c with is_held = true}
   let release c = {c with is_held = false}
+
+  let grow_berserk ~elapsed_time c =
+    if c.kind = Sick Berserk && c.radius < berserk_radius
+    then
+      { c with
+        radius =
+          c.radius +. (berserk_growing_rate *. !(c.sim_speed) *. elapsed_time)
+      }
+    else c
 end

@@ -17,10 +17,12 @@ let%client effect ~creet:initial_creet ~limits ~hospital_limit_y ~elt () =
         let parent_x, parent_y = !parent_pos in
         let mouse_x, mouse_y = !mouse_pos in
         creet |> Creet.M.hold
+        |> Creet.M.grow_berserk ~elapsed_time
         |> Creet.M.set_pos ~limits
              (float_of_int mouse_x -. parent_x, float_of_int mouse_y -. parent_y)
       else
         creet |> Creet.M.release
+        |> Creet.M.grow_berserk ~elapsed_time
         |> Creet.M.move ~timestamp ~elapsed_time ~limits ~hospital_limit_y
     in
     let x, y =
