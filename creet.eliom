@@ -19,6 +19,8 @@ module type%shared M = sig
   val update_color : elt:Html_types.div Eliom_content.Html.F.elt -> t -> t
   val heal_by_hospital_touch : hospital_limit_y:float -> t -> t
   val is_healthy : t -> t
+  val hold : t -> t
+  val release : t -> t
 end
 
 module%shared M = struct
@@ -34,6 +36,7 @@ module%shared M = struct
     ; radius : float
     ; speed : float
     ; direction : float
+    ; is_held : bool
     ; time_before_next_rotation : float }
 
   let grab_offset = 20.
@@ -58,6 +61,7 @@ module%shared M = struct
     ; radius
     ; speed
     ; direction
+    ; is_held = false
     ; time_before_next_rotation }
 
   let spawn ~sim_speed pos =
@@ -67,6 +71,7 @@ module%shared M = struct
     ; radius = healthy_radius
     ; speed = healthy_speed
     ; direction = 1.63577 *. Float.pi
+    ; is_held = false
     ; time_before_next_rotation = 0. }
 
   let get_pos {pos} = pos
@@ -155,6 +160,8 @@ module%shared M = struct
 
   let contaminate_by_river_touch ~river_limit_y c =
     let is_contaminated =
+      c.is_held = false
+      &&
       let _, y = c.pos and radius = c.radius in
       y -. radius <= river_limit_y
     in
@@ -173,14 +180,15 @@ module%shared M = struct
 
   let contaminate_by_sick_touch creets c =
     let is_contaminated =
-      List.exists
-        (fun creet ->
-           creet.kind = Sick
-           && are_creets_touching creet c
-           &&
-           let contaminate_prob_random = Random.float 1. in
-           contaminate_prob_random <= contaminate_prob)
-        creets
+      c.is_held = false
+      && List.exists
+           (fun creet ->
+              creet.kind = Sick
+              && are_creets_touching creet c
+              &&
+              let contaminate_prob_random = Random.float 1. in
+              contaminate_prob_random <= contaminate_prob)
+           creets
     in
     if is_contaminated then {c with kind = Sick} else c
 
@@ -210,4 +218,6 @@ module%shared M = struct
     if is_healed then {c with kind = Healthy} else c
 
   let is_healthy c = c.kind = Healthy
+  let hold c = {c with is_held = true}
+  let release c = {c with is_held = false}
 end
